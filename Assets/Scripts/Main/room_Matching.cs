@@ -170,7 +170,7 @@ public class room_Matching : MonoBehaviour
 
     public void setRoomName(string s)
     {
-        so.trgRoom = s;
+        so.trgRoom = WWW.EscapeURL(s);
     }
 }
 

@@ -7,20 +7,24 @@ using System.Collections.Specialized;
 public class ui_Manager : MonoBehaviour
 {
     GameManager gm;
-    public GameObject Menu01,Menu02,Menu03;
+    public GameObject Menu01,Menu02,Menu03,Load;
     public List<GameObject> Players;
     // Start is called before the first frame update
     void Start()
     {
         gm = GameManager.Instance;
-        //Players = new List<GameObject>();
         Menu();
         PlayerClear();
+        //Load.GetComponent<Animator>().SetBool("On", false);
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.RoomSettingComp)
+            .Subscribe(_ => AllClean());
     }
 
     private void Update()
     {
-        if(!Menu01.GetComponent<Animator>().GetBool("On")  && Input.GetKeyDown(KeyCode.Escape)){
+        if(!Menu01.GetComponent<Animator>().GetBool("On")  && Input.GetKeyDown(KeyCode.Escape) && gm._GameState.Value!=GameState.RoomSettingComp){
             gm._GameState.Value = GameState.Menu;
             var data = new Dictionary<string, string>();
             data["to"] = "LEAVE";
@@ -79,5 +83,17 @@ public class ui_Manager : MonoBehaviour
             if(g.GetComponent<Animator>().GetBool("On"))
                 g.GetComponent<Animator>().SetBool("On", false);
         }
+    }
+
+    void LoadScene()
+    {
+        Load.GetComponent<Animator>().SetBool("On", true);
+    }
+
+    void AllClean()
+    {
+        LoadScene();
+        HideMenu3();
+        PlayerClear();
     }
 }

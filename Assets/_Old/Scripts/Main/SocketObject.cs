@@ -58,9 +58,9 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 	public void Start() 
 	{
 		DontDestroyOnLoad (this.gameObject);
-        Connect();
+        //Connect();
         GameManager.Instance._GameState.Value = GameState.Menu;
-	}
+    }
 
 	public void joinRoom(string roomName){
 		var data = new Dictionary<string,string>();
@@ -160,9 +160,10 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 			//GetComponent<DataWorker> ().MAX = int.Parse(d["max"]);
 			Debug.Log ("[SocketIO] ID received: " + e.name + " " + e.data);
 		}
-		//ルーム情報のリクエスト
-		//socket.GetComponent<SocketObject> ().EmitMessage ("GetRooms",new Dictionary<string,string>());
-	}
+        //ルーム情報のリクエスト
+        //socket.GetComponent<SocketObject> ().EmitMessage ("GetRooms",new Dictionary<string,string>());
+        GetComponent<ui_Manager>().Load.GetComponent<Animator>().SetTrigger("Start");//幕開け
+    }
 		
 	public void UpdateRoom(SocketIOEvent e){
 		//他プレイヤーへのROOM更新要請
@@ -301,5 +302,14 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 		name = "";
 		id = "";
 	}
+
+    public void setInputName(string s)
+    {
+        if (s != null && s != "")
+        {
+            name =  s;
+            Connect();
+        }
+    }
 
 }
