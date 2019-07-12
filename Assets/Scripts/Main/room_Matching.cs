@@ -14,8 +14,6 @@ public class room_Matching : MonoBehaviour
 
     [SerializeField] GameObject content, pref;
 
-    public string trgRoomName;
-
     public JSONObject roomState;
 
     public Room myRoom;
@@ -32,23 +30,28 @@ public class room_Matching : MonoBehaviour
 
         gm._GameState
             .DistinctUntilChanged()
+            .Where(x => x == GameState.Menu)
+            .Subscribe(_ => roomState=null);
+
+        gm._GameState
+            .DistinctUntilChanged()
             .Where(x => x == GameState.GetRoomData)
             .Subscribe(_ => RoomDataIndicate());
 
         gm._GameState
             .DistinctUntilChanged()
             .Where(x => x == GameState.CreateRoom)
-            .Subscribe(_ => CreateNewRoom(trgRoomName));
+            .Subscribe(_ => CreateNewRoom(so.trgRoom));
 
         gm._GameState
             .DistinctUntilChanged()
             .Where(x => x == GameState.WaitingOtherPlayer)
-            .Subscribe(_ => Debug.Log("ルームメンバー募集中..."));
+            .Subscribe(_ => WaitingOtherPlayer());
 
         gm._GameState
             .DistinctUntilChanged()
-            .Where(x => x == GameState.CheckRoomData)
-            .Subscribe(_ => JoinRoom(trgRoomName));
+            .Where(x => x == GameState.JoinRoom)
+            .Subscribe(_ => JoinRoom(so.trgRoom));
 
         gm._GameState
             .DistinctUntilChanged()
@@ -64,26 +67,22 @@ public class room_Matching : MonoBehaviour
 
     void RoomDataIndicate()
     {
-
-        Debug.Log(roomState);
+        //Debug.Log(roomState);
         var state = roomState;
 
         var roomindex = state.keys
-            //.Select((key, index) => new { Key = key, Index = index, Cnt = int.Parse(state.list[index]["length"].ToString()), isPlaying = state.list[index]["playing"].ToString().Equals("false") })
             .Select((key, index) => index)
-            .Where(index => !state.keys[index].Equals(so.id) && int.Parse(state.list[index]["length"].ToString()) < 4 && state.list[index]["playing"].ToString().Equals("false"));
+            .Where(index => !state.list[index]["sockets"].ToDictionary().First().Key.Equals(state.keys[index]))
+            .Where(index => int.Parse(state.list[index]["length"].ToString()) < 4 && state.list[index]["playing"].ToString().Equals("false"));
+        //Debug.Log(roomindex.Count());
 
         GetComponent<ui_Manager>().Menu03.GetComponent<room_Indicater>().Clear();
         
         foreach (int i in roomindex)
         {
+            Debug.Log("ルーム表示");
             string name = state.keys[i];
             int cnt = int.Parse(state.list[i]["length"].ToString());
-            var member = new Dictionary<string, string>();
-            foreach (KeyValuePair<string, string> d in state.list[i]["sockets"].ToDictionary())
-            {
-                member.Add(d.Key, d.Value);
-            }
             GetComponent<ui_Manager>().Menu03.GetComponent<room_Indicater>().SetNode(name, cnt);
         }
     }
@@ -95,16 +94,15 @@ public class room_Matching : MonoBehaviour
 
         var state = roomState;
 
-        var s = state.keys
-            .Select((key, index) => new { Key = key, Index = index, Cnt = int.Parse(state.list[index]["length"].ToString()), isPlaying = state.list[index]["playing"].ToString().Equals("false") })
-            .Where(item => !item.Key.Equals(so.id) && item.Key.Equals(roomName) && item.Cnt < dw.MAX && item.isPlaying)
-            .Select(item => item.Key).First();
-
-        if (s != null)
+        var roomindex = state.keys
+            .Select((key, index) => index)
+            .Where(index => !state.list[index]["sockets"].ToDictionary().First().Key.Equals(state.keys[index]))
+            .Where(index => int.Parse(state.list[index]["length"].ToString()) < 4 && state.list[index]["playing"].ToString().Equals("false")).First();
+        if (state.keys[roomindex] != null)
         {
             var data = new Dictionary<string, string>();
             data["to"] = "JOIN";
-            data["room"] = s;
+            data["room"] = state.keys[roomindex];
             data["name"] = so.name;
             data["max"] = "4";
             so.EmitMessage("RoomMatching", data);
@@ -114,50 +112,11 @@ public class room_Matching : MonoBehaviour
             Debug.Log("ルームがいっぱいでした。");
         }
         gm._GameState.Value = GameState.WaitingOtherPlayer;
-
-        /*
-        for (int i = 0; i < state.list.Count; i++)
-        {
-            if (!so.id.Equals(state.keys[i]))
-            {
-                string roomName = state.keys[i].ToString();
-                int cnt = int.Parse(state.list[i]["length"].ToString());
-                //if (roomName.Contains("[ROOM]"))
-                if (roomName.Equals(trgRoomName))
-                {
-                    Debug.Log(roomName);
-                    if (dw.MAX > cnt)
-                    {
-                        if (state.list[i]["playing"].ToString().Equals("false"))
-                        {
-                            Debug.Log("Room:[" + roomName + "] " + cnt + "/" + dw.MAX);
-                            //ルーム入室リクエスト送信（未確定）
-                            var data = new Dictionary<string, string>();
-                            data["to"] = roomName;
-                            data["name"] = so.name;
-                            data["max"] = "4";
-                            so.EmitMessage("Quick", data);
-                            hit = true;
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-        //もし入室可能な部屋が見つからなかったら新しい部屋を作る
-        if (!hit)
-        {
-            Debug.Log("ルームがいっぱいでした。");
-        }
-
-        gm._GameState.Value = GameState.WaitingOtherPlayer;
-        */
-
     }
 
     void CreateNewRoom(String roomName)
     {
-        if (roomName == null)
+        if (roomName == null || roomName == "")
             Debug.Log("ルーム名が取得できません");
 
         var data = new Dictionary<string, string>();
@@ -172,6 +131,9 @@ public class room_Matching : MonoBehaviour
 
     void RoomDataCheck()
     {
+        GetComponent<ui_Manager>().PlayerClear();
+        GetComponent<ui_Manager>().PlayerAdd(myRoom.member);
+
         Debug.Log("check");
         if (myRoom.cnt == 4)
         {
@@ -181,8 +143,13 @@ public class room_Matching : MonoBehaviour
         else
         {
             Debug.Log("wait");
-            gm._GameState.Value = GameState.RoomSerching;
+            gm._GameState.Value = GameState.WaitingOtherPlayer;
         }
+    }
+
+    void WaitingOtherPlayer()
+    {
+        Debug.Log("ルームメンバー募集中...");
     }
 
     IEnumerator RequestRoomData()
@@ -203,7 +170,7 @@ public class room_Matching : MonoBehaviour
 
     public void setRoomName(string s)
     {
-        trgRoomName = s;
+        so.trgRoom = s;
     }
 }
 

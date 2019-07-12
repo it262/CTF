@@ -41,6 +41,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 	public string id,name;
 
+    public string trgRoom;
+
 	public bool connecting = false;
 
 	void Awake(){
@@ -181,6 +183,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 	public void RoomData(SocketIOEvent e){
         Debug.Log("GETROOMDATA");
 		GetComponent<room_Matching>().roomState = e.data;
+        Debug.Log(e.data);
         GameManager.Instance._GameState.Value = GameState.GetRoomData;
 	}
 
@@ -191,8 +194,6 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
     public void Join(SocketIOEvent e){
         Debug.Log("JOIN");
-        if (GameManager.Instance._GameState.Value == GameState.CreateRoom)
-            GetComponent<ui_Manager>().RoomList();
         var data = new JSONObject (e.data.ToString ());
 		Room r = new Room (data ["name"].ToString());
         foreach (KeyValuePair<string,string> d in data ["sockets"].ToDictionary()) {

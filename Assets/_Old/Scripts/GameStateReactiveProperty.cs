@@ -28,7 +28,7 @@ public enum GameState
 
     RoomSerching,
 
-    CheckRoomData,
+    JoinRoom,
 
     WaitingOtherPlayer,
 

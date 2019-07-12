@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class node_Script : MonoBehaviour
 {
+    GameManager gm;
     [SerializeField] GameObject fillBar;
     [SerializeField] Text text;
 
@@ -17,6 +18,7 @@ public class node_Script : MonoBehaviour
     {
         fill = 0;
         fillWidth = 1000;
+        gm = GameManager.Instance;
     }
 
     public void setFill(int cnt)
@@ -31,6 +33,7 @@ public class node_Script : MonoBehaviour
 
     public void pressEnter()
     {
-
+        SocketObject.Instance.trgRoom = text.text;
+        gm._GameState.Value = GameState.JoinRoom;
     }
 }

@@ -31,6 +31,9 @@ public class menu_Button : MonoBehaviour
     public void JoinRoom()
     {
         if (gm._GameState.Value == GameState.Menu)
+        {
             gm._GameState.Value = GameState.RoomSerching;
+            GetComponent<ui_Manager>().RoomList();
+        }
     }
 }

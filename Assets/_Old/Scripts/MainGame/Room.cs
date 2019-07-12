@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Specialized;
 
 public class Room{
 
 	public GameObject g;
 	public string roomName;
 	public int cnt;
-	public Dictionary<string,string> member = new Dictionary<string,string>();
+	public OrderedDictionary member = new OrderedDictionary();
 	public string master;
 	public bool playing;
 
