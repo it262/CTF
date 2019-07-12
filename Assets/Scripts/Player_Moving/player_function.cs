@@ -18,7 +18,8 @@ public class player_function : MonoBehaviour
     public bool is_my_turn;
     public bool is_goal;
     public bool is_dead;
-
+    public float attack_range;
+    public string direction;
     void Start()
     {
     }
@@ -56,28 +57,25 @@ public class player_function : MonoBehaviour
         {
             transform.position += gameObject.transform.rotation * velocity;
         }
-        else {
-            //Don't Move!
-        }
 
         //どの方向を向いているかが分かる
         if (45 <= transform.eulerAngles.y && transform.eulerAngles.y < 135)
         {
-            Debug.Log("Right");
+            direction = "Right";
         }
         else if(135 <= transform.eulerAngles.y && transform.eulerAngles.y < 225)
         {
-            Debug.Log("Down");
+            direction = "Down";
         }
         else if(225 <= transform.eulerAngles.y && transform.eulerAngles.y < 315)
         {
-            Debug.Log("Left");
+            direction = "Left";
         }
         else
         {
-            Debug.Log("Up");
+            direction = "Up";
         }
-
+      
         //自分のターンの間は攻撃出来る
         if (is_my_turn)
         {
@@ -88,10 +86,20 @@ public class player_function : MonoBehaviour
 
     //Rayで
     //*殴った相手と自分の向きの情報
-    public void Attack()
+    void Attack()
     {
-		//Any Scripts
-        
+        Debug.Log(transform.forward);
+        if (Input.GetMouseButton(0))
+        {
+            Ray ray = new Ray(transform.position, transform.forward);
+            if (Physics.Raycast(ray, out RaycastHit hit, attack_range))
+            {
+                obstacle_function hit_component = hit.collider.gameObject.GetComponent<obstacle_function>();
+                int send_masu_x = hit_component.get_masu_x();
+                int send_masu_y = hit_component.get_masu_y();
+                //+animetion
+            }
+        }
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -107,11 +115,11 @@ public class player_function : MonoBehaviour
         //*自分が死亡したという情報
         if(collision.gameObject.name == "Obstacle")
         {
-            //if (collision.gameObject.get_is_moving())
-            //{
-            //    is_dead = true;
-            //    Destroy(gameObject);
-            //}
+            if (collision.gameObject.GetComponent<obstacle_function>().get_is_moving())
+            {
+                is_dead = true;
+                Destroy(gameObject);
+            }
         }
     }
 
