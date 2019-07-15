@@ -30,6 +30,30 @@ public enum GameState
 
     RoomSettingComp,
 
+    //仮
+    Menu,
+
+    //以下game
+    StageSettingComp,
+
+    ObstacleSettingComp,
+
+    ReadyEventStart,
+
+    TurnEventComp,
+
+    GameStart,
+
+    MoveObstacles,
+
+    ChangeTurn,
+
+    GameEnd,
+
+    ResultEventComp,
+
+    //以上game
+
     DefaultObstacleSetting,
 
     PlayerSetting,
