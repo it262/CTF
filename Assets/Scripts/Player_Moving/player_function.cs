@@ -14,6 +14,9 @@ public class player_function : MonoBehaviour
     /// </summary>
 
     GameManager gm;
+    SocketObject so;
+
+    public player_manager pm;
 
     public float move_speed;
     public float rotate_speed;
@@ -22,15 +25,16 @@ public class player_function : MonoBehaviour
     bool is_my_turn = false;
     bool is_goal = false;
     bool is_dead = false;
-    bool is_enemy = true;
+    [SerializeField]bool is_enemy = true;
     //virtual
     Vector3 send_position;
-    Quaternion send_rotation;
+    Vector3 send_rotation;
     string send_direction;
     // Start is called before the first frame update
     void Start()
     {
         gm = GameManager.Instance;
+        so = SocketObject.Instance;
     }
 
     // Update is called once per frame
@@ -52,7 +56,7 @@ public class player_function : MonoBehaviour
         {
             Vector3 def = transform.rotation.eulerAngles;
             def.y -= rotate_speed;
-            send_rotation = Quaternion.Euler(def);
+            send_rotation = def;
         }
 
         if (Input.GetKey(KeyCode.S))
@@ -64,7 +68,9 @@ public class player_function : MonoBehaviour
         {
             Vector3 def = transform.rotation.eulerAngles;
             def.y += rotate_speed;
-            send_rotation = Quaternion.Euler(def);
+            send_rotation = def;
+            transform.eulerAngles = send_rotation;
+            
         }
 
         velocity = velocity.normalized * move_speed * Time.deltaTime;
@@ -73,11 +79,25 @@ public class player_function : MonoBehaviour
         {
             Vector3 def = transform.position;
             send_position = def + gameObject.transform.rotation * velocity;
+            transform.position = send_position;
+            
         }
 
         //*位置と向きを送る
-        //send_position
-        //send_rotation
+        if (send_position != null || send_rotation != null)
+        {
+            var data = new Dictionary<string, string>();
+            data["TYPE"] = "Trans";
+            //send_position
+            data["posX"] = send_position.x.ToString();
+            data["posY"] = send_position.y.ToString();
+            data["posZ"] = send_position.z.ToString();
+            //send_rotation
+            data["rotX"] = send_rotation.x.ToString();
+            data["rotY"] = send_rotation.y.ToString();
+            data["rotZ"] = send_rotation.z.ToString();
+            so.EmitMessage("ToOwnRoom", data);
+        }
 
         //自分のターンの間は攻撃出来る
         if (is_my_turn)
@@ -153,10 +173,10 @@ public class player_function : MonoBehaviour
         this.is_my_turn = is_my_turn;
     }
 
-    public void set_pos_rot(Vector3 pos, Quaternion rot)
+    public void set_pos_rot(Vector3 pos, Vector3 rot)
     {
         this.transform.position = pos;
-        this.transform.rotation = rot;
+        this.transform.eulerAngles = rot;
     }
 
     public void set_is_enemy(bool is_enemy)

@@ -23,9 +23,11 @@ public class player_manager : MonoBehaviour
     //virtual
     int player_number;
     //サーバから位置情報を受け取る
-    string receive_id;
-    Vector3 receive_position;
-    Quaternion receive_rotation;
+    //string receive_id = "";
+    //Vector3 receive_position;
+    //Quaternion receive_rotation;
+    public Dictionary<string,Vector3> receive_position;
+    public Dictionary<string, Vector3> receive_rotation;
     //これのindex順でターンが進行するので、ランダムな順番にできるかも？
     string[] players_id = {"a","b","c","d"};
     // Start is called before the first frame update
@@ -36,20 +38,32 @@ public class player_manager : MonoBehaviour
             .DistinctUntilChanged()
             .Where(x => x == GameState.ObstacleSettingComp)
             .Subscribe(_ => set_player());
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        //*サーバから位置と向きを受け取ったら更新する
-        GameObject player = players[receive_id];
-        player_function player_component = player.GetComponent<player_function>();
-        player_component.set_pos_rot(receive_position, receive_rotation);
 
         gm._GameState
             .DistinctUntilChanged()
             .Where(x => x == GameState.ChangeTurn)
             .Subscribe(_ => change_turn());
+
+        players = new Dictionary<string, GameObject>();
+        receive_position = new Dictionary<string, Vector3>();
+        receive_rotation = new Dictionary<string, Vector3>();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        foreach (KeyValuePair<string, Vector3> pos in receive_position)
+        {
+            string receive_id = pos.Key;
+            Vector3 rot = receive_rotation[receive_id];
+            if (players.ContainsKey(receive_id))
+            {
+                //*サーバから位置と向きを受け取ったら更新する
+                GameObject player = players[receive_id];
+                player_function player_component = player.GetComponent<player_function>();
+                player_component.set_pos_rot(pos.Value, rot);
+            }
+        }
     }
 
     public void set_player()
@@ -58,8 +72,8 @@ public class player_manager : MonoBehaviour
         //ステージ
         getStagePos stage_component = stage_manager.GetComponent<getStagePos>();
         masu_real_point = stage_component.get_data();
-        masu_x_number = stage_component.get_x_length();
-        masu_y_number = stage_component.get_y_length();
+        masu_x_number = stage_component.get_x_length()-1;
+        masu_y_number = stage_component.get_y_length()-1;
         //今回のゲームのプレイヤー数を調べる
         player_number = players_id.Length;
         //誰からスタートするかの抽選
@@ -86,6 +100,7 @@ public class player_manager : MonoBehaviour
             }
             GameObject player = (GameObject)Instantiate(player_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
             player.transform.LookAt(goal_flug.transform);
+            player.GetComponent<player_function>().pm = this;
             if(turn_number == i)
             {
                 player.GetComponent<player_function>().set_my_turn(true);
