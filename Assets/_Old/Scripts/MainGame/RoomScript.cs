@@ -27,12 +27,12 @@ public class RoomScript : MonoBehaviour {
             .DistinctUntilChanged()
             .Where(x => x == GameState.WaitingOtherPlayer)
             .Subscribe(_ => Debug.Log("ルームメンバー募集中..."));
-
+        /*
         gm._GameState
             .DistinctUntilChanged()
             .Where(x => x == GameState.CheckRoomData)
             .Subscribe(_ => QuickStart());
-
+            */
         gm._GameState
             .DistinctUntilChanged()
             .Where(x => x == GameState.RoomDataUpdate)

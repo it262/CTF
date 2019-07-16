@@ -20,9 +20,15 @@ public enum GameState
 {
     None,
 
+    Menu,
+
+    CreateRoom,
+
+    GetRoomData,
+
     RoomSerching,
 
-    CheckRoomData,
+    JoinRoom,
 
     WaitingOtherPlayer,
 

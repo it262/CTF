@@ -57,4 +57,9 @@ public class getStagePos : MonoBehaviour
     {
         return data.GetLength(1);
     }
+
+    public Vector3 getPos(int x,int z)
+    {
+        return data[x, z];
+    }
 }
