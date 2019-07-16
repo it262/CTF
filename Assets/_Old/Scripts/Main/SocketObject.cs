@@ -45,6 +45,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 	public bool connecting = false;
 
+    /*
 	void Awake(){
 		GameObject[] sockets = GameObject.FindGameObjectsWithTag ("SocketObject");
 		if (sockets.Length > 1) {
@@ -54,6 +55,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 		Cursor.lockState = CursorLockMode.None;
 		Cursor.SetCursor (null,Vector2.zero,CursorMode.ForceSoftware);
 	}
+    */
 
 	public void Start() 
 	{
@@ -80,7 +82,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 		if (connecting) {
 			socket.Emit (s, new JSONObject (d));
 		} else {
-			Debug.Log ("[ERROR]オンライン状態ではありません");
+            Debug.Log ("[ERROR]オンライン状態ではありません");
 		}
 	}
 
@@ -241,8 +243,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
     public void Trans(SocketIOEvent e)
     {
         Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
-        GetComponent<DataWorker>().posSync.Add(d["id"], new Vector3(float.Parse(d["x"]), float.Parse(d["y"]), float.Parse(d["z"])));
-        GetComponent<DataWorker>().rotSync.Add(d["id"], new Vector2(float.Parse(d["headY"]), float.Parse(d["bodyY"])));
+        GetComponent<player_manager>().receive_position.Add(d["id"], new Vector3(float.Parse(d["posX"]), float.Parse(d["posY"]), float.Parse(d["posZ"])));
+        GetComponent<player_manager>().receive_rotation.Add(d["id"], new Vector3(float.Parse(d["rotX"]), float.Parse(d["rotY"]), float.Parse(d["rotZ"])));
         Debug.Log("Transform受信");
     }
 
