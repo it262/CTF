@@ -41,6 +41,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 	public string id,name;
 
+    public string trgRoom;
+
 	public bool connecting = false;
 
 	void Awake(){
@@ -56,7 +58,9 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 	public void Start() 
 	{
 		DontDestroyOnLoad (this.gameObject);
-	}
+        //Connect();
+        GameManager.Instance._GameState.Value = GameState.Menu;
+    }
 
 	public void joinRoom(string roomName){
 		var data = new Dictionary<string,string>();
@@ -94,12 +98,13 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 				socket.On ("open", SocketOpen);
 				socket.On ("ID", ReceiveID);
 				socket.On ("UpdateRoom", UpdateRoom);
-				socket.On ("GetRooms", GetRooms);
 				socket.On ("PingName",PingName);
 				socket.On ("PongName", PongName);
-				socket.On ("Quick", Quick);
-				socket.On ("Leady", Leady);
-				socket.On ("GameStart", GameStart);
+				socket.On ("RoomData", RoomData);
+                socket.On ("Failure", Failure);
+                socket.On ("Join", Join);
+                socket.On ("Already", Already);
+                socket.On ("GameStart", GameStart);
 				socket.On ("Message", Message);
                 socket.On ("Transform", Trans);
                 socket.On ("Hit", Hit);
@@ -155,18 +160,14 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 			//GetComponent<DataWorker> ().MAX = int.Parse(d["max"]);
 			Debug.Log ("[SocketIO] ID received: " + e.name + " " + e.data);
 		}
-		//ルーム情報のリクエスト
-		//socket.GetComponent<SocketObject> ().EmitMessage ("GetRooms",new Dictionary<string,string>());
-	}
+        //ルーム情報のリクエスト
+        //socket.GetComponent<SocketObject> ().EmitMessage ("GetRooms",new Dictionary<string,string>());
+        GetComponent<ui_Manager>().Load.GetComponent<Animator>().SetTrigger("Start");//幕開け
+    }
 		
 	public void UpdateRoom(SocketIOEvent e){
 		//他プレイヤーへのROOM更新要請
 		GetComponent<DataWorker>().roomQue.Enqueue(new JSONObject(e.data.ToString ()).ToDictionary());
-	}
-
-	public void GetRooms(SocketIOEvent e){
-		GetComponent<DataWorker>().roomState = e.data;
-		Debug.Log (e.data);
 	}
 
 	public void PingName(SocketIOEvent e){
@@ -180,28 +181,39 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 		GetComponent<DataWorker> ().myRoom.member [d ["id"]] = WWW.UnEscapeURL (d ["name"]);
 	}
 
-	public void Quick(SocketIOEvent e){
-		GetComponent<DataWorker>().roomState = e.data;
-        GameManager.Instance._GameState.Value = GameState.CheckRoomData;
+	public void RoomData(SocketIOEvent e){
+        Debug.Log("GETROOMDATA");
+		GetComponent<room_Matching>().roomState = e.data;
+        Debug.Log(e.data);
+        GameManager.Instance._GameState.Value = GameState.GetRoomData;
 	}
 
-	public void Leady(SocketIOEvent e){
-		var data = new JSONObject (e.data.ToString ());
+    public void Failure(SocketIOEvent e)
+    {
+        Debug.Log("ルームが満員になりました");
+    }
+
+    public void Join(SocketIOEvent e){
+        Debug.Log("JOIN");
+        var data = new JSONObject (e.data.ToString ());
 		Room r = new Room (data ["name"].ToString());
-        var dw = GetComponent<DataWorker>();
-        dw.RoomMaster = null;
         foreach (KeyValuePair<string,string> d in data ["sockets"].ToDictionary()) {
-            if (dw.RoomMaster == null)
-                dw.RoomMaster = d.Key;
 			r.member.Add(d.Key,d.Value);
 		}
 		r.cnt = int.Parse (data["length"].ToString ());
-		dw.myRoom = r;
+        GetComponent<room_Matching>().myRoom = r;
+        Debug.Log("[入室]" + r.roomName);
         GameManager.Instance._GameState.Value = GameState.RoomDataUpdate;
-		Debug.Log ("[入室]"+r.roomName);
 	}
-		
-	public void GameStart(SocketIOEvent e){
+
+    public void Already(SocketIOEvent e)
+    {
+        var data = new JSONObject(e.data.ToString());
+        Debug.Log("Room:" + data["room"] + "は既に存在しています");
+        GameManager.Instance._GameState.Value = GameState.Menu;
+    }
+
+    public void GameStart(SocketIOEvent e){
 		//GetComponent<DataWorker> ().startFlug = true;
 	}
 
@@ -290,5 +302,14 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 		name = "";
 		id = "";
 	}
+
+    public void setInputName(string s)
+    {
+        if (s != null && s != "")
+        {
+            name =  s;
+            Connect();
+        }
+    }
 
 }

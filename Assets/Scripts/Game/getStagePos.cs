@@ -28,4 +28,9 @@ public class getStagePos : MonoBehaviour
             }
         }
     }
+
+    public Vector3 getPos(int x,int z)
+    {
+        return data[x, z];
+    }
 }
