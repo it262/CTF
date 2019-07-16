@@ -57,6 +57,7 @@ public class player_function : MonoBehaviour
             Vector3 def = transform.rotation.eulerAngles;
             def.y -= rotate_speed;
             send_rotation = def;
+            transform.eulerAngles = send_rotation;
         }
 
         if (Input.GetKey(KeyCode.S))

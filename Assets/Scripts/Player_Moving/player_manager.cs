@@ -5,6 +5,7 @@ using UniRx;
 
 public class player_manager : MonoBehaviour
 {
+    SocketObject so;
     //ゲームマネージャー
     GameManager gm;
     //ステージ
@@ -34,6 +35,7 @@ public class player_manager : MonoBehaviour
     void Start()
     {
         gm = GameManager.Instance;
+        so = SocketObject.Instance;
         gm._GameState
             .DistinctUntilChanged()
             .Where(x => x == GameState.ObstacleSettingComp)
@@ -68,6 +70,7 @@ public class player_manager : MonoBehaviour
 
     public void set_player()
     {
+        players_id[0] = so.id;
         //playerの初期配置
         //ステージ
         getStagePos stage_component = stage_manager.GetComponent<getStagePos>();
@@ -99,11 +102,15 @@ public class player_manager : MonoBehaviour
                 spawn_masu_y = masu_y_number;
             }
             GameObject player = (GameObject)Instantiate(player_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
-            player.transform.LookAt(goal_flug.transform);
+            //player.transform.LookAt(goal_flug.transform);
             player.GetComponent<player_function>().pm = this;
             if(turn_number == i)
             {
                 player.GetComponent<player_function>().set_my_turn(true);
+            }
+            if(players_id[i] == so.id)
+            {
+                player.GetComponent<player_function>().set_is_enemy(false);
             }
             players.Add(players_id[i], player);
         }

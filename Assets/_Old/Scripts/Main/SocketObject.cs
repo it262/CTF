@@ -159,8 +159,9 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 			//GetComponent<DataWorker> ().MAX = int.Parse(d["max"]);
 			Debug.Log ("[SocketIO] ID received: " + e.name + " " + e.data);
 		}
-		//ルーム情報のリクエスト
-		//socket.GetComponent<SocketObject> ().EmitMessage ("GetRooms",new Dictionary<string,string>());
+        //ルーム情報のリクエスト
+        //socket.GetComponent<SocketObject> ().EmitMessage ("GetRooms",new Dictionary<string,string>());
+        GameManager.Instance._GameState.Value = GameState.RoomSettingComp;
 	}
 		
 	public void UpdateRoom(SocketIOEvent e){

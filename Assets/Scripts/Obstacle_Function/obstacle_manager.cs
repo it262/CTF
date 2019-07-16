@@ -39,15 +39,17 @@ public class obstacle_manager : MonoBehaviour
             .Where(x => x == GameState.StageSettingComp)
             .Subscribe(_ => set_obstacle());//処理
 
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.MoveObstacles)
+            .Subscribe(_ => move_obstacles());
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        gm._GameState
-            .DistinctUntilChanged()
-            .Where(x => x == GameState.MoveObstacles)
-            .Subscribe(_ => move_obstacles());
+        
     }
 
 
@@ -65,15 +67,21 @@ public class obstacle_manager : MonoBehaviour
         {
             for (int masu_y = 0; masu_y < masu_y_number; masu_y++)
             {
-                GameObject obstacle = null;
-                int set_random_obstacle = Random.Range(0, set_obstacle_frequency);
-                if (set_random_obstacle == 0)
+                if ((masu_x != 0 && masu_x != masu_x_number - 1) || (masu_y != 0 && masu_y != masu_y_number - 1))
                 {
-                    obstacle = (GameObject)Instantiate(obstacle_prefab, masu_real_point[masu_x, masu_y], Quaternion.identity);
-                    obstacle_function obs_component = obstacle.GetComponent<obstacle_function>();
-                    obs_component.set_masu(masu_x, masu_y);
+                    if (masu_x != masu_x_number / 2 || masu_y != masu_y_number / 2)
+                    {
+                        GameObject obstacle = null;
+                        int set_random_obstacle = Random.Range(0, set_obstacle_frequency);
+                        if (set_random_obstacle == 0)
+                        {
+                            obstacle = (GameObject)Instantiate(obstacle_prefab, masu_real_point[masu_x, masu_y], Quaternion.identity);
+                            obstacle_function obs_component = obstacle.GetComponent<obstacle_function>();
+                            obs_component.set_masu(masu_x, masu_y);
+                        }
+                        obs_list[masu_x, masu_y] = obstacle;
+                    }
                 }
-                obs_list[masu_x, masu_y] = obstacle;
             }
         }
 

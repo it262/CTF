@@ -14,8 +14,22 @@ public class getStagePos : MonoBehaviour
     void Start()
     {
         gm = GameManager.Instance;
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.RoomSettingComp)
+            .Subscribe(_ => settingStage());//処理
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    void settingStage()
+    {
         pivot = new Vector3(-1, 1, 1) + transform.position;
-        data = new Vector3[x-1,z-1];
+        data = new Vector3[x - 1, z - 1];
 
         for (int i = 0; i < x - 1; i++)
         {
@@ -26,14 +40,7 @@ public class getStagePos : MonoBehaviour
                     Instantiate(debugObj, data[i, j], Quaternion.identity);
             }
         }
-
         gm._GameState.Value = GameState.StageSettingComp;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public Vector3[,] get_data()
