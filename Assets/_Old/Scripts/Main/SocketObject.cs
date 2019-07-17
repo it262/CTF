@@ -120,6 +120,9 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 				socket.On ("HeartBeat", HeartBeat);
 				socket.On ("error", ReceiveError);
 				socket.On ("close", SocketClose);
+                socket.On ("Goal", Goal);
+                socket.On ("ObsSet", ObsSet);
+                socket.On ("NoHostObsSetComp", ToHostCompSetObs);
 
 				socket.Connect ();
 
@@ -290,7 +293,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 	public void Dead(SocketIOEvent e)
 	{
-		GetComponent<DataWorker>().exclusion(new JSONObject(e.data.ToString ()).ToDictionary()["id"]);
+        Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
+        GetComponent<player_manager>().set_is_dead_player(d["id"]);
 	}
 
 	public void HeartBeat(SocketIOEvent e)
@@ -314,4 +318,38 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
         }
     }
 
+    public void Goal(SocketIOEvent e)
+    {
+        Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
+        GetComponent<event_manager>().any_player_goal(d["id"]);
+    }
+
+    public void ObsSet(SocketIOEvent e)
+    {
+        List<Vector2> masu_list = new List<Vector2>();
+        Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
+        GetComponent<obstacle_manager>().obs_set_comp[d["id"]] = true;
+
+        foreach (KeyValuePair<string, string> pair in d)
+        {
+            if(pair.Key != "TYPE")
+            {
+                String[] list = pair.Value.Split(':');
+                masu_list.Add(new Vector2(int.Parse(list[0]), int.Parse(list[1])));
+            }
+        }
+        GetComponent<obstacle_manager>().set_obstacle_nohost(d);
+    }
+
+    public void ToHostCompSetObs(SocketIOEvent e)
+    {
+        Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
+        id = d["id"];
+        GetComponent<obstacle_manager>().obs_set_comp[id] = true;
+
+        if (!GetComponent<obstacle_manager>().obs_set_comp.ContainsValue(false))
+        {
+            GetComponent<obstacle_manager>().start_ready_event();
+        }
+    }
 }
