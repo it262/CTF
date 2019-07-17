@@ -16,9 +16,9 @@ public class player_manager : MonoBehaviour
     int masu_y_number;
     //プレイヤ
     public GameObject player_prefab;
-    public OrderedDictionary members;　//id情報と名前*
-    public Dictionary<string, GameObject> players;//idとプレイヤーの対応辞書*
-    Dictionary<string, bool> is_players_dead; //idと死んだかどうかの対応表
+    public OrderedDictionary members = new OrderedDictionary();　//id情報と名前*
+    public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();//idとプレイヤーの対応辞書*
+    Dictionary<string, bool> is_players_dead = new Dictionary<string, bool>(); //idと死んだかどうかの対応表
     int player_number;//今回の参加プレイヤー数
     //ターン
     public string[] players_id_turn_info;//ターンの情報*
@@ -69,10 +69,10 @@ public class player_manager : MonoBehaviour
         members = GetComponent<room_Matching>().myRoom.member;
         players_id_turn_info = new string[members.Count];
         int count = 0;
-        foreach (KeyValuePair<string, string> pair in members)
+        foreach (DictionaryEntry pair in members)
         {
-            players_id_turn_info[count] = pair.Key;
-            is_players_dead[pair.Key] = false;
+            players_id_turn_info[count] = pair.Key.ToString();
+            is_players_dead[pair.Key.ToString()] = false;
             count++;
         }
         players = new Dictionary<string, GameObject>();
