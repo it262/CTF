@@ -329,7 +329,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
         List<Vector2> masu_list = new List<Vector2>();
         Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
         GetComponent<obstacle_manager>().obs_set_comp[d["id"]] = true;
-
+        Debug.Log("0000000000000000");
+        /*
         foreach (KeyValuePair<string, string> pair in d)
         {
             if(pair.Key != "TYPE")
@@ -338,6 +339,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
                 masu_list.Add(new Vector2(int.Parse(list[0]), int.Parse(list[1])));
             }
         }
+        */
         GetComponent<obstacle_manager>().set_obstacle_nohost(d);
     }
 
@@ -346,7 +348,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
         Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
         id = d["id"];
         GetComponent<obstacle_manager>().obs_set_comp[id] = true;
-
+        Debug.Log(id + ":" + GetComponent<obstacle_manager>().obs_set_comp[id]);
         if (!GetComponent<obstacle_manager>().obs_set_comp.ContainsValue(false))
         {
             GetComponent<obstacle_manager>().start_ready_event();

@@ -33,6 +33,7 @@ public class event_manager : MonoBehaviour
             {
                 time = 0;
 
+                Debug.Log("Go!");
                 this.info_text.text = "Go!";
                 gm._GameState.Value = GameState.GameStart;
                 this.info_text.text = "";
@@ -87,7 +88,7 @@ public class event_manager : MonoBehaviour
     }
 
     public void ready_event() {
-        this.info_text = this.GetComponent<Text>();
+        //this.info_text = this.GetComponent<Text>();
         if(time < 5.0f)
         {
             this.info_text.text = "Start from " + GetComponent<player_manager>().members[GetComponent<player_manager>().players_id_turn_info[GetComponent<player_manager>().turn_number]] + "!";
@@ -101,6 +102,7 @@ public class event_manager : MonoBehaviour
         {
             this.info_text.text = "1";
         }
+
     }
 
     public void draw_event()

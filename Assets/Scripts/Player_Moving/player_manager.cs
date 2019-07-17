@@ -54,12 +54,13 @@ public class player_manager : MonoBehaviour
         {
             string receive_id = pos.Key;
             Vector3 rot = receive_rotation[receive_id];
-            if (players.ContainsKey(receive_id))
+            if (players.ContainsKey(receive_id) && !receive_id.Equals(so.id))
             {
                 //*サーバから位置と向きを受け取ったら更新する
                 GameObject player = players[receive_id];
                 player_function player_component = player.GetComponent<player_function>();
                 player_component.set_pos_rot(pos.Value, rot);
+                players.Remove(receive_id);
             }
         }
     }
@@ -85,7 +86,7 @@ public class player_manager : MonoBehaviour
         //今回のゲームのプレイヤー数を調べる
         player_number = players_id_turn_info.Length;
         //誰からスタートするかの抽選
-        turn_number = Random.Range(0, player_number);
+        turn_number = 0;// Random.Range(0, player_number);
         for (int i = 0; i < player_number; i++)
         {
             int spawn_masu_x = 0, spawn_masu_y = 0;

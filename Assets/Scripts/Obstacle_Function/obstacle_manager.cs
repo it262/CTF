@@ -81,15 +81,15 @@ public class obstacle_manager : MonoBehaviour
                 {
                     if ((masu_x != 0 && masu_x != masu_x_number - 1) || (masu_y != 0 && masu_y != masu_y_number - 1))
                     {
-                        data[cnt.ToString()] = "null";
+                        //data[cnt.ToString()] = "null";
                         if (masu_x != masu_x_number / 2 || masu_y != masu_y_number / 2)
                         {
                             //data[cnt.ToString()] = masu_x + ":" + masu_y;
-                            data[(masu_x + (masu_y * masu_x_number)).ToString()] = masu_x + ":" + masu_y;
                             GameObject obstacle = null;
                             int set_random_obstacle = Random.Range(0, set_obstacle_frequency);
                             if (set_random_obstacle == 0)
                             {
+                                data[(masu_x + (masu_y * masu_x_number)).ToString()] = masu_x + ":" + masu_y;
                                 obstacle = (GameObject)Instantiate(obstacle_prefab, masu_real_point[masu_x, masu_y], Quaternion.identity);
                                 obstacle_function obs_component = obstacle.GetComponent<obstacle_function>();
                                 obs_component.set_masu(masu_x, masu_y);

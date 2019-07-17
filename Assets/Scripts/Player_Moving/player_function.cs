@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UniRx;
 
 public class player_function : MonoBehaviour
 {
@@ -29,15 +30,29 @@ public class player_function : MonoBehaviour
     Vector3 send_rotation;
     string send_direction;
     // Start is called before the first frame update
+
+    bool start = false;
     void Start()
     {
         gm = GameManager.Instance;
         so = SocketObject.Instance;
+
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.GameStart)
+            .Subscribe(_ => start = true);
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!start)
+        {
+            Debug.Log("待機中...");
+            send_position = transform.position;
+            send_rotation = transform.eulerAngles;
+            return;
+        }
         if (is_enemy)
         {
             return;
