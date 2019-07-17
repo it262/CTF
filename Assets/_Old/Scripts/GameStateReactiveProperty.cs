@@ -36,9 +36,6 @@ public enum GameState
 
     RoomSettingComp,
 
-    //仮
-    Menu,
-
     //以下game
     StageSettingComp,
 
