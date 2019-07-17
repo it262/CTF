@@ -164,7 +164,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 		}
         //ルーム情報のリクエスト
         //socket.GetComponent<SocketObject> ().EmitMessage ("GetRooms",new Dictionary<string,string>());
-        GetComponent<ui_Manager>().Load.GetComponent<Animator>().SetTrigger("Start");//幕開け
+        GetComponent<ui_Manager>().Name.GetComponent<Animator>().SetTrigger("Start");//幕開け
     }
 		
 	public void UpdateRoom(SocketIOEvent e){
