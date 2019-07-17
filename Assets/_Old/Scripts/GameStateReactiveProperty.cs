@@ -36,28 +36,26 @@ public enum GameState
 
     RoomSettingComp,
 
-    //仮
-    Menu,
-
     //以下game
+    //ステージの情報を取得
     StageSettingComp,
-
-    ObstacleSettingComp,
-
+    //プレイヤーを生成
+    PlayerSettingComp,
+    //障害物を配置
     ReadyEventStart,
-
-    TurnEventComp,
-
+    //ゲーム開始演出
     GameStart,
-
+    //ゲームプレイ中
     MoveObstacles,
-
+    //障害物が動く
     ChangeTurn,
-
+    //次の人にターンを移す
+    //全員死亡、制限時間までにゴール出来なかったら=Draw。誰かがゴールにたどり着いたら=Win。
+    DrawEventStart,
+    WinEventStart,
+    //ゲーム終了演出
     GameEnd,
-
-    ResultEventComp,
-
+    //playerとobstacleを全て破壊して、Menuへ。
     //以上game
 
     DefaultObstacleSetting,

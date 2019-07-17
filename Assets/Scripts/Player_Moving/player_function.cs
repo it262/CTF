@@ -16,8 +16,6 @@ public class player_function : MonoBehaviour
     GameManager gm;
     SocketObject so;
 
-    public player_manager pm;
-
     public float move_speed;
     public float rotate_speed;
     public float attack_range;
@@ -88,7 +86,7 @@ public class player_function : MonoBehaviour
         if (send_position != null || send_rotation != null)
         {
             var data = new Dictionary<string, string>();
-            data["TYPE"] = "Trans";
+            data["TYPE"] = "Transform";
             //send_position
             data["posX"] = send_position.x.ToString();
             data["posY"] = send_position.y.ToString();
@@ -135,12 +133,20 @@ public class player_function : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit, attack_range))
             {
                 obstacle_function hit_component = hit.collider.gameObject.GetComponent<obstacle_function>();
+
                 int send_masu_x = hit_component.get_masu_x();
                 int send_masu_y = hit_component.get_masu_y();
                 //*殴った相手と自分の向きの情報を送る
                 //send_masu_x
                 //send_masu_y
                 //send_direction
+
+                var data = new Dictionary<string, string>();
+                data["TYPE"] = "Hit";
+                data["masuX"] = send_masu_x.ToString();
+                data["masuY"] = send_masu_y.ToString();
+                data["direction"] = send_direction;
+                so.EmitMessage("ToOwnRoom", data);
 
                 this.set_my_turn(false);
                 gm._GameState.Value = GameState.MoveObstacles;
@@ -155,6 +161,9 @@ public class player_function : MonoBehaviour
         if (collision.gameObject.name == "Goal")
         {
             is_goal = true;
+            var data = new Dictionary<string, string>();
+            data["TYPE"] = "Goal";
+            so.EmitMessage("ToOwnRoom", data);
         }
 
         //障害物に潰されたら死亡する
@@ -165,6 +174,9 @@ public class player_function : MonoBehaviour
             {
                 is_dead = true;
                 Destroy(gameObject);
+                var data = new Dictionary<string, string>();
+                data["TYPE"] = "Dead";
+                so.EmitMessage("ToOwnRoom", data);
             }
         }
     }
@@ -183,5 +195,15 @@ public class player_function : MonoBehaviour
     public void set_is_enemy(bool is_enemy)
     {
         this.is_enemy = is_enemy;
+    }
+
+    public void set_is_dead(bool is_dead)
+    {
+        //もしかしたら上のコードでdead判定に成功しているかも知れないので
+        if (!this.is_dead)
+        {
+            this.is_dead = is_dead;
+            Destroy(gameObject);
+        }
     }
 }

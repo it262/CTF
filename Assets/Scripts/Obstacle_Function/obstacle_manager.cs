@@ -12,7 +12,8 @@ public class obstacle_manager : MonoBehaviour
     ///・障害物にターゲット座標を渡し、フラグを立てる*
     ///・リストの位置情報を更新する*
     /// </summary>
- 
+
+    SocketObject so;
     //ゲームマネージャー
     GameManager gm;
     //outside
@@ -23,69 +24,127 @@ public class obstacle_manager : MonoBehaviour
     int masu_y_number;
 
     //inside
-    GameObject[,] obs_list;
+    public GameObject[,] obs_list;//*
     public int set_obstacle_frequency = 3;
 
     //virtual
     int receive_masu_x;
     int receive_masu_y;
     string receive_attack_direction;
+
+    public Dictionary<string, bool> obs_set_comp = new Dictionary<string, bool>();
     // Start is called before the first frame update
     void Start()
     {
         gm = GameManager.Instance;
-        gm._GameState
-            .DistinctUntilChanged()
-            .Where(x => x == GameState.StageSettingComp)
-            .Subscribe(_ => set_obstacle());//処理
+        so = SocketObject.Instance;
 
         gm._GameState
             .DistinctUntilChanged()
-            .Where(x => x == GameState.MoveObstacles)
-            .Subscribe(_ => move_obstacles());
+            .Where(x => x == GameState.PlayerSettingComp)
+            .Subscribe(_ => set_obstacle());//処理
 
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if(gm._GameState.Value == GameState.MoveObstacles)
+        {
+            move_obstacles();
+        }
     }
 
 
-    //ここ誰かがまず決めてそれを他のユーザに配る感じにしなくてはダメな感じですかね？
     void set_obstacle()
     {
-        getStagePos stage_component = stage_manager.GetComponent<getStagePos>();
-        masu_real_point = stage_component.get_data();
-        masu_x_number = stage_component.get_x_length();
-        masu_y_number = stage_component.get_y_length();
-        obs_list = new GameObject[masu_x_number, masu_y_number];
-        //マス座標を決定して、それに対応する実座標にobstacleを生成する。
-        //生成したマス座標をkeyとして、それに対応する生成したobstacleと一対一対応するkey-valueを作る
-        for (int masu_x = 0; masu_x < masu_x_number; masu_x++)
+        for (int i = 0; i < GetComponent<player_manager>().players_id_turn_info.Length; i++)
         {
-            for (int masu_y = 0; masu_y < masu_y_number; masu_y++)
+            obs_set_comp[GetComponent<player_manager>().players_id_turn_info[i]] = false;
+        }
+
+        if (GetComponent<player_manager>().players_id_turn_info[0] == so.id)
+        {
+            getStagePos stage_component = stage_manager.GetComponent<getStagePos>();
+            masu_real_point = stage_component.get_data();
+            masu_x_number = stage_component.get_x_length();
+            masu_y_number = stage_component.get_y_length();
+            obs_list = new GameObject[masu_x_number, masu_y_number];
+            var data = new Dictionary<string, string>();
+            data["TYPE"] = "ObsSet";
+            int cnt = 0;
+            //マス座標を決定して、それに対応する実座標にobstacleを生成する。
+            //生成したマス座標をkeyとして、それに対応する生成したobstacleと一対一対応するkey-valueを作る
+            for (int masu_x = 0; masu_x < masu_x_number; masu_x++)
             {
-                if ((masu_x != 0 && masu_x != masu_x_number - 1) || (masu_y != 0 && masu_y != masu_y_number - 1))
+                for (int masu_y = 0; masu_y < masu_y_number; masu_y++)
                 {
-                    if (masu_x != masu_x_number / 2 || masu_y != masu_y_number / 2)
+                    if ((masu_x != 0 && masu_x != masu_x_number - 1) || (masu_y != 0 && masu_y != masu_y_number - 1))
                     {
-                        GameObject obstacle = null;
-                        int set_random_obstacle = Random.Range(0, set_obstacle_frequency);
-                        if (set_random_obstacle == 0)
+                        data[cnt.ToString()] = "null";
+                        if (masu_x != masu_x_number / 2 || masu_y != masu_y_number / 2)
                         {
-                            obstacle = (GameObject)Instantiate(obstacle_prefab, masu_real_point[masu_x, masu_y], Quaternion.identity);
-                            obstacle_function obs_component = obstacle.GetComponent<obstacle_function>();
-                            obs_component.set_masu(masu_x, masu_y);
+                            //data[cnt.ToString()] = masu_x + ":" + masu_y;
+                            data[(masu_x + (masu_y * masu_x_number)).ToString()] = masu_x + ":" + masu_y;
+                            GameObject obstacle = null;
+                            int set_random_obstacle = Random.Range(0, set_obstacle_frequency);
+                            if (set_random_obstacle == 0)
+                            {
+                                obstacle = (GameObject)Instantiate(obstacle_prefab, masu_real_point[masu_x, masu_y], Quaternion.identity);
+                                obstacle_function obs_component = obstacle.GetComponent<obstacle_function>();
+                                obs_component.set_masu(masu_x, masu_y);
+                            }
+                            obs_list[masu_x, masu_y] = obstacle;
                         }
-                        obs_list[masu_x, masu_y] = obstacle;
+                        cnt++;
                     }
                 }
             }
+
+            obs_set_comp[so.id] = true;
+            so.EmitMessage("ToOwnRoom", data);
         }
 
-        gm._GameState.Value = GameState.ObstacleSettingComp;
+    }
+
+    public void set_obstacle_nohost(Dictionary<string, string> masu_list)
+    {
+        if (GetComponent<player_manager>().players_id_turn_info[0] != so.id)
+        {
+            getStagePos stage_component = stage_manager.GetComponent<getStagePos>();
+            masu_real_point = stage_component.get_data();
+            masu_x_number = stage_component.get_x_length();
+            masu_y_number = stage_component.get_y_length();
+            obs_list = new GameObject[masu_x_number, masu_y_number];
+            Dictionary<string, string> receive_masu_info = new Dictionary<string, string>();
+            for (int masu_x = 0; masu_x < masu_y_number; masu_x++)
+            {
+                for (int masu_y = 0; masu_y < masu_y_number; masu_y++)
+                {
+                    GameObject obstacle = null;
+
+                    //0 < masu_x < 9
+                    //0 < masu_y < 9
+                    //0 < masu_x_number < 10
+                    if (masu_list.ContainsKey((masu_x + (masu_y * masu_x_number)).ToString()))
+                    {
+                        obstacle = (GameObject)Instantiate(obstacle_prefab, masu_real_point[masu_x, masu_y], Quaternion.identity);
+                        obstacle_function obs_component = obstacle.GetComponent<obstacle_function>();
+                        obs_component.set_masu(masu_x, masu_y);
+                    }
+                    obs_list[masu_x, masu_y] = obstacle;
+                }
+            }
+
+            var data = new Dictionary<string, string>();
+            data["TYPE"] = "NoHostObsSetComp";
+            so.EmitMessage("ToOwnRoom", data);
+        }
+    }
+
+    public void start_ready_event()
+    {
+        gm._GameState.Value = GameState.ReadyEventStart;
     }
 
     void move_obstacles()
