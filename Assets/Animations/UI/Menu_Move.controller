@@ -6,7 +6,7 @@ AnimatorController:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Load
+  m_Name: Menu_Move
   serializedVersion: 5
   m_AnimatorParameters:
   - m_Name: On
@@ -169,7 +169,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Load_MoveOn
+  m_Name: Menu_MoveOn
   m_Speed: -1
   m_CycleOffset: 0
   m_Transitions:
@@ -196,7 +196,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Load_MoveOff
+  m_Name: Menu_MoveOff
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -227,20 +227,20 @@ AnimatorStateMachine:
   m_ChildStates:
   - serializedVersion: 1
     m_State: {fileID: 1102535023369206574}
-    m_Position: {x: -84, y: 300, z: 0}
+    m_Position: {x: -168, y: 324, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102379473575830422}
-    m_Position: {x: 72, y: 180, z: 0}
+    m_Position: {x: 12, y: 180, z: 0}
   - serializedVersion: 1
     m_State: {fileID: 1102440136064859244}
-    m_Position: {x: 204, y: 300, z: 0}
+    m_Position: {x: 156, y: 312, z: 0}
   m_ChildStateMachines: []
   m_AnyStateTransitions: []
   m_EntryTransitions: []
   m_StateMachineTransitions: {}
   m_StateMachineBehaviours: []
-  m_AnyStatePosition: {x: 50, y: 20, z: 0}
+  m_AnyStatePosition: {x: 336, y: 144, z: 0}
   m_EntryPosition: {x: 50, y: 120, z: 0}
-  m_ExitPosition: {x: 156, y: 348, z: 0}
+  m_ExitPosition: {x: 336, y: 432, z: 0}
   m_ParentStateMachinePosition: {x: 800, y: 20, z: 0}
   m_DefaultState: {fileID: 1102379473575830422}

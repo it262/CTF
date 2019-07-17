@@ -7,12 +7,13 @@ using System.Collections.Specialized;
 public class ui_Manager : MonoBehaviour
 {
     GameManager gm;
-    public GameObject Menu01,Menu02,Menu03,Load;
+    public GameObject Menu01,Menu02,Menu03,Name,Load;
     public List<GameObject> Players;
     // Start is called before the first frame update
     void Start()
     {
         gm = GameManager.Instance;
+        LoadComp();
         Menu();
         PlayerClear();
         //Load.GetComponent<Animator>().SetBool("On", false);
@@ -20,6 +21,12 @@ public class ui_Manager : MonoBehaviour
             .DistinctUntilChanged()
             .Where(x => x == GameState.RoomSettingComp)
             .Subscribe(_ => AllClean());
+
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.RoomSettingComp)
+            .Delay(System.TimeSpan.FromSeconds(3.0f))
+            .Subscribe(_ => LoadComp());
     }
 
     private void Update()
@@ -95,5 +102,10 @@ public class ui_Manager : MonoBehaviour
         LoadScene();
         HideMenu3();
         PlayerClear();
+    }
+
+    void LoadComp()
+    {
+        Load.GetComponent<Animator>().SetBool("On", false);
     }
 }
