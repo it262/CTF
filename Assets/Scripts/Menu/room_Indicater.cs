@@ -22,6 +22,7 @@ public class room_Indicater : MonoBehaviour
         node_Script script = n.GetComponent<node_Script>();
         script.setText(roomName);
         script.setFill(cnt);
+        nodes.Add(n);
     }
 
     public void Clear()

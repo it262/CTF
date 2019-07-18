@@ -42,6 +42,8 @@ public class ui_Manager : MonoBehaviour
             data["to"] = "LEAVE";
             SocketObject.Instance.EmitMessage("RoomMatching", data);
             Menu();
+            GetComponent<room_Matching>().roomState = null;
+            GetComponent<ui_Manager>().Menu03.GetComponent<room_Indicater>().Clear();
         }
     }
 
@@ -56,6 +58,7 @@ public class ui_Manager : MonoBehaviour
     public void RoomList()
     {
         PlayerClear();
+        GetComponent<ui_Manager>().Menu03.GetComponent<room_Indicater>().Clear();
         Menu01.GetComponent<Animator>().SetBool("On", false);
         Menu02.GetComponent<Animator>().SetBool("On", false);
         Menu03.GetComponent<Animator>().SetBool("On", true);

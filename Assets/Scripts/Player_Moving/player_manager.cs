@@ -58,44 +58,54 @@ public class player_manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(TurnIndicater_Inscance != null && !is_players_dead[players_id_turn_info[turn_number]])
+        if(is_players_dead.Count != 4)
         {
-            TurnIndicater_Inscance.transform.position = players[players_id_turn_info[turn_number]].transform.position + new Vector3(0,1.5f,0);
-            TurnIndicater_Inscance.transform.eulerAngles += new Vector3(0, 10*Time.deltaTime, 0);
+            return;
         }
-        if (receive_position.Count > 0)
-        {
-            foreach (KeyValuePair<string, Vector3> pos in receive_position)
+            if (TurnIndicater_Inscance != null && !is_players_dead[players_id_turn_info[turn_number]])
             {
-                string receive_id = pos.Key;
-                Vector3 rot = receive_rotation[receive_id];
-                if (players.ContainsKey(receive_id) && !receive_id.Equals(so.id))
+                TurnIndicater_Inscance.transform.position = players[players_id_turn_info[turn_number]].transform.position + new Vector3(0, 1.5f, 0);
+                TurnIndicater_Inscance.transform.eulerAngles += new Vector3(0, 10 * Time.deltaTime, 0);
+            }
+            if (receive_position.Count > 0)
+            {
+                foreach (KeyValuePair<string, Vector3> pos in receive_position)
                 {
-                    Debug.Log(receive_id + ":" + pos.Value);
-                    //*サーバから位置と向きを受け取ったら更新する
-                    if (!is_players_dead[receive_id]){
-                        GameObject player = players[receive_id];
-                        player_function player_component = player.GetComponent<player_function>();
-                        player_component.set_pos_rot(pos.Value, rot);
+                    string receive_id = pos.Key;
+                    Vector3 rot = receive_rotation[receive_id];
+                    if (players.ContainsKey(receive_id) && !receive_id.Equals(so.id))
+                    {
+                        Debug.Log(receive_id + ":" + pos.Value);
+                        //*サーバから位置と向きを受け取ったら更新する
+                        if (!is_players_dead[receive_id])
+                        {
+                            GameObject player = players[receive_id];
+                            player_function player_component = player.GetComponent<player_function>();
+                            player_component.set_pos_rot(pos.Value, rot);
+                        }
                     }
                 }
+                receive_position.Clear();
+                receive_rotation.Clear();
             }
-            receive_position.Clear();
-            receive_rotation.Clear();
-        }
     }
 
     public void set_player()
     {
+        Debug.Log("プレイヤー償還");
         members = GetComponent<room_Matching>().myRoom.member;
         players_id_turn_info = new string[members.Count];
+        is_players_dead = new Dictionary<string, bool>();
         int count = 0;
+        Debug.Log(members.Count);
         foreach (DictionaryEntry pair in members)
         {
+            Debug.Log("プレイヤー償還...");
             players_id_turn_info[count] = pair.Key.ToString();
             is_players_dead.Add(pair.Key.ToString(), false);
             count++;
         }
+        Debug.Log("プレイヤー償還2");
         players = new Dictionary<string, GameObject>();
         //playerの初期配置
         //ステージ
@@ -153,7 +163,7 @@ public class player_manager : MonoBehaviour
             }
 
         }
-
+        Debug.Log("プレイヤー償還3");
         //なんかアニメーションをやる？どういう順番で進行していくかとかのUIができたらいいよね。
         gm._GameState.Value = GameState.PlayerSettingComp;
     }
@@ -202,6 +212,8 @@ public class player_manager : MonoBehaviour
         {
             Destroy(pair.Value);
         }
+        Destroy(TurnIndicater_Inscance);
+        TurnIndicater_Inscance = null;
         players.Clear();
     }
 }
