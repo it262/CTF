@@ -58,6 +58,11 @@ public class player_manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(TurnIndicater_Inscance != null && !is_players_dead[players_id_turn_info[turn_number]])
+        {
+            TurnIndicater_Inscance.transform.position = players[players_id_turn_info[turn_number]].transform.position + new Vector3(0,1.5f,0);
+            TurnIndicater_Inscance.transform.eulerAngles += new Vector3(0, 10*Time.deltaTime, 0);
+        }
         if (receive_position.Count > 0)
         {
             foreach (KeyValuePair<string, Vector3> pos in receive_position)
@@ -68,9 +73,11 @@ public class player_manager : MonoBehaviour
                 {
                     Debug.Log(receive_id + ":" + pos.Value);
                     //*サーバから位置と向きを受け取ったら更新する
-                    GameObject player = players[receive_id];
-                    player_function player_component = player.GetComponent<player_function>();
-                    player_component.set_pos_rot(pos.Value, rot);
+                    if (!is_players_dead[receive_id]){
+                        GameObject player = players[receive_id];
+                        player_function player_component = player.GetComponent<player_function>();
+                        player_component.set_pos_rot(pos.Value, rot);
+                    }
                 }
             }
             receive_position.Clear();
@@ -80,7 +87,6 @@ public class player_manager : MonoBehaviour
 
     public void set_player()
     {
-        Debug.Log("1");
         members = GetComponent<room_Matching>().myRoom.member;
         players_id_turn_info = new string[members.Count];
         int count = 0;
@@ -96,7 +102,6 @@ public class player_manager : MonoBehaviour
         getStagePos stage_component = stage_manager.GetComponent<getStagePos>();
         masu_real_point = stage_component.get_data();
         masu_x_number = stage_component.get_x_length();
-        Debug.Log(masu_x_number);
         masu_y_number = stage_component.get_y_length();
         //今回のゲームのプレイヤー数を調べる
         player_number = players_id_turn_info.Length;
@@ -104,7 +109,6 @@ public class player_manager : MonoBehaviour
         turn_number = 0;// Random.Range(0, player_number);
         for (int i = 0; i < player_number; i++)
         {
-            Debug.Log("2");
             int spawn_masu_x = 0, spawn_masu_y = 0;
             if (i == 0)
             {
@@ -123,12 +127,12 @@ public class player_manager : MonoBehaviour
                 spawn_masu_x = 0;
                 spawn_masu_y = masu_y_number - 1;
             }
-            Debug.Log("3");
 
             if (players_id_turn_info[i] == so.id)
             {
                 GameObject player = (GameObject)Instantiate(player_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
                 player.GetComponent<player_function>().set_is_enemy(false);
+                player.GetComponent<player_function>().name_Indicater.GetComponent<TextMesh>().text = members[players_id_turn_info[i]].ToString();
                 if (turn_number == i)
                 {
                     player.GetComponent<player_function>().set_my_turn(true);
@@ -139,6 +143,7 @@ public class player_manager : MonoBehaviour
             else
             {
                 GameObject player = (GameObject)Instantiate(enemy_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
+                player.GetComponent<player_function>().name_Indicater.GetComponent<TextMesh>().text = members[players_id_turn_info[i]].ToString();
                 if (turn_number == i)
                 {
                     player.GetComponent<player_function>().set_my_turn(true);

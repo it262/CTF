@@ -55,6 +55,11 @@ public class room_Matching : MonoBehaviour
             .DistinctUntilChanged()
             .Where(x => x == GameState.RoomDataUpdate)
             .Subscribe(_ => RoomDataCheck());
+
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.DrawEventStart)
+            .Subscribe(_ => myRoom=null);
     }
 
     // Update is called once per frame

@@ -17,6 +17,8 @@ public class player_function : MonoBehaviour
     GameManager gm;
     SocketObject so;
 
+    public GameObject name_Indicater;
+
     public float move_speed;
     public float rotate_speed;
     public float attack_range;
@@ -32,6 +34,7 @@ public class player_function : MonoBehaviour
     // Start is called before the first frame update
 
     bool start = false;
+
     void Start()
     {
         gm = GameManager.Instance;
@@ -46,6 +49,8 @@ public class player_function : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        name_Indicater.transform.LookAt(Camera.main.transform);
+        name_Indicater.transform.eulerAngles += new Vector3(0, 180, 0);
         if (!start)
         {
             Debug.Log("待機中...");
@@ -70,7 +75,6 @@ public class player_function : MonoBehaviour
             Vector3 def = transform.rotation.eulerAngles;
             def.y -= rotate_speed;
             send_rotation = def;
-            transform.eulerAngles = send_rotation;
         }
 
         if (Input.GetKey(KeyCode.S))
@@ -96,6 +100,7 @@ public class player_function : MonoBehaviour
         //*位置と向きを送る
         if (transform.position != send_position || transform.eulerAngles != send_rotation)
         {
+            Debug.Log("SendPosition");
             transform.position = send_position;
             transform.eulerAngles = send_rotation;
             var data = new Dictionary<string, string>();
@@ -187,7 +192,7 @@ public class player_function : MonoBehaviour
             //*自分が死亡したという情報
             if (collision.gameObject.CompareTag("Obstacle"))
             {
-                if (collision.gameObject.GetComponent<obstacle_function>().get_is_moving())
+                if (collision.gameObject.GetComponent<obstacle_function>().get_is_moving() && !is_my_turn)
                 {
                     Debug.Log("衝突！！！！！！！！！！");
                     //is_dead = true;

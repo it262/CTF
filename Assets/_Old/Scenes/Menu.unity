@@ -1677,7 +1677,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00004690982, y: 0.00003458249}
+  m_AnchoredPosition: {x: -0.00004690982, y: -0.000091863694}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &966212016
@@ -6963,7 +6963,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1014048229}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.9999999
+  m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7306,6 +7306,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6271455200182271962, guid: 7a22cd982b5900c40b032255aca2b16e,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: d8b24f86a0abc0e4f8347301487e29aa, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7a22cd982b5900c40b032255aca2b16e, type: 3}
 --- !u!1 &1298167772
@@ -8307,7 +8312,7 @@ MonoBehaviour:
     type: 3}
   players_id_turn_info: []
   turn_number: 0
-  TurnIndicater: {fileID: 3089369814807406559, guid: 29521fc44918f0148818c1efeb9ee1c0,
+  TurnIndicater: {fileID: 3078505988395337110, guid: 75276be175ec6ef489c1d9feaa0027c5,
     type: 3}
 --- !u!114 &1863396644
 MonoBehaviour:

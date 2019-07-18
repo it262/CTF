@@ -83,7 +83,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 	public void EmitMessage(string s,Dictionary<string,string> d){
 		if (connecting) {
-			socket.Emit (s, new JSONObject (d));
+            socket.Emit (s, new JSONObject (d));
 		} else {
             Debug.Log ("[ERROR]オンライン状態ではありません");
 		}
@@ -223,7 +223,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
         Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
         GetComponent<player_manager>().receive_position.Add(d["id"], new Vector3(float.Parse(d["posX"]), float.Parse(d["posY"]), float.Parse(d["posZ"])));
         GetComponent<player_manager>().receive_rotation.Add(d["id"], new Vector3(float.Parse(d["rotX"]), float.Parse(d["rotY"]), float.Parse(d["rotZ"])));
-        Debug.Log("Transform受信");
+        Debug.Log("Transform受信"+d["id"]);
     }
 
     public void Hit(SocketIOEvent e)
@@ -294,9 +294,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
     public void ToHostCompSetObs(SocketIOEvent e)
     {
         Dictionary<string, string> d = new JSONObject(e.data.ToString()).ToDictionary();
-        id = d["id"];
-        GetComponent<obstacle_manager>().obs_set_comp[id] = true;
-        Debug.Log(id + ":" + GetComponent<obstacle_manager>().obs_set_comp[id]);
+        GetComponent<obstacle_manager>().obs_set_comp[d["id"]] = true;
+        Debug.Log(id + ":" + GetComponent<obstacle_manager>().obs_set_comp[d["id"]]);
         if (!GetComponent<obstacle_manager>().obs_set_comp.ContainsValue(false))
         {
             GetComponent<obstacle_manager>().start_ready_event();

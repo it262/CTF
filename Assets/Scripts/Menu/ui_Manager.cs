@@ -121,5 +121,6 @@ public class ui_Manager : MonoBehaviour
         data["to"] = "LEAVE";
         SocketObject.Instance.EmitMessage("RoomMatching", data);
         Menu();
+        gm._GameState.Value = GameState.Menu;
     }
 }

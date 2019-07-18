@@ -145,6 +145,6 @@ public class event_manager : MonoBehaviour
             }
         }
 
-        gm._GameState.Value = GameState.Menu;
+        gm._GameState.Value = GameState.DrawEventStart;
     }
 }
