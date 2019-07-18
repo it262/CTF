@@ -75,6 +75,7 @@ public class player_manager : MonoBehaviour
 
     public void set_player()
     {
+        Debug.Log("1");
         members = GetComponent<room_Matching>().myRoom.member;
         players_id_turn_info = new string[members.Count];
         int count = 0;
@@ -89,14 +90,16 @@ public class player_manager : MonoBehaviour
         //ステージ
         getStagePos stage_component = stage_manager.GetComponent<getStagePos>();
         masu_real_point = stage_component.get_data();
-        masu_x_number = stage_component.get_x_length()-1;
-        masu_y_number = stage_component.get_y_length()-1;
+        masu_x_number = stage_component.get_x_length();
+        Debug.Log(masu_x_number);
+        masu_y_number = stage_component.get_y_length();
         //今回のゲームのプレイヤー数を調べる
         player_number = players_id_turn_info.Length;
         //誰からスタートするかの抽選
         turn_number = 0;// Random.Range(0, player_number);
         for (int i = 0; i < player_number; i++)
         {
+            Debug.Log("2");
             int spawn_masu_x = 0, spawn_masu_y = 0;
             if(i == 0)
             {
@@ -104,17 +107,18 @@ public class player_manager : MonoBehaviour
                 spawn_masu_y = 0;
             }else if(i == 1)
             {
-                spawn_masu_x = masu_x_number;
+                spawn_masu_x = masu_x_number-1;
                 spawn_masu_y = 0;
             }else if(i == 2)
             {
-                spawn_masu_x = masu_x_number;
-                spawn_masu_y = masu_y_number;
+                spawn_masu_x = masu_x_number-1;
+                spawn_masu_y = masu_y_number-1;
             }else if(i == 3)
             {
                 spawn_masu_x = 0;
-                spawn_masu_y = masu_y_number;
+                spawn_masu_y = masu_y_number-1;
             }
+            Debug.Log("3");
             GameObject player = (GameObject)Instantiate(player_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
             if(turn_number == i)
             {

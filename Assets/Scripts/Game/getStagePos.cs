@@ -29,17 +29,19 @@ public class getStagePos : MonoBehaviour
     void settingStage()
     {
         pivot = new Vector3(-1, 1, 1) + transform.position;
-        data = new Vector3[x - 1, z - 1];
+        data = new Vector3[x - 2, z - 2];
 
-        for (int i = 0; i < x - 1; i++)
+        for (int i = 0; i < data.GetLength(0); i++)
         {
-            for (int j = 0; j < z - 1; j++)
+            for (int j = 0; j < data.GetLength(1); j++)
             {
                 data[i, j] = pivot + new Vector3(i * -1, 0, j * 1);
                 if (debugObj != null)
                     Instantiate(debugObj, data[i, j], Quaternion.identity);
+                Debug.Log(i);
             }
         }
+        Debug.Log("ステージ準備完了");
         gm._GameState.Value = GameState.StageSettingComp;
     }
 

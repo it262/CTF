@@ -193,13 +193,12 @@ public class obstacle_manager : MonoBehaviour
                         is_null_zone = true;
                     }
                 }
-                distance--;
                 foreach (GameObject obs in moving_obs_list)
                 {
                     obstacle_function obs_component = obs.GetComponent<obstacle_function>();
                     obs_component.set_masu(receive_masu_x, obs_component.get_masu_y() - distance);
-                    obs_component.set_target_position(masu_real_point[receive_masu_x, obs_component.get_masu_y() - distance]);
-                    obs_list[receive_masu_x, obs_component.get_masu_y() - distance] = obs;
+                    obs_component.set_target_position(masu_real_point[receive_masu_x, obs_component.get_masu_y()]);
+                    obs_list[receive_masu_x, obs_component.get_masu_y()] = obs;
                     obs_component.set_is_moving(true);
                 }
                 is_search = false;
@@ -227,16 +226,13 @@ public class obstacle_manager : MonoBehaviour
                         is_null_zone = true;
                     }
                 }
-
-                distance--;
-
                 foreach (GameObject obs in moving_obs_list)
                 {
                     obstacle_function obs_component = obs.GetComponent<obstacle_function>();
+                    Debug.Log(obs_component.get_masu_y()+ ":"+distance);
                     obs_component.set_masu(receive_masu_x, obs_component.get_masu_y() + distance);
-                    Debug.Log(distance);
-                    obs_component.set_target_position(masu_real_point[receive_masu_x, obs_component.get_masu_y() + distance]);
-                    obs_list[receive_masu_x, obs_component.get_masu_y() + distance] = obs;
+                    obs_component.set_target_position(masu_real_point[receive_masu_x, obs_component.get_masu_y()]);
+                    obs_list[receive_masu_x, obs_component.get_masu_y()] = obs;
                     obs_component.set_is_moving(true);
                 }
                 is_search = false;
@@ -244,7 +240,7 @@ public class obstacle_manager : MonoBehaviour
             else if (receive_attack_direction.Equals("Left"))
             {
                 //y固定、x正方向
-                for (int i = receive_masu_x; i < masu_x_number; i++)
+                for (int i = receive_masu_x; i <= masu_x_number; i++)
                 {
                     if (obs_list[i, receive_masu_y] != null)
                     {
@@ -264,14 +260,12 @@ public class obstacle_manager : MonoBehaviour
                         is_null_zone = true;
                     }
                 }
-                distance--;
-
                 foreach (GameObject obs in moving_obs_list)
                 {
                     obstacle_function obs_component = obs.GetComponent<obstacle_function>();
                     obs_component.set_masu(obs_component.get_masu_x() + distance, receive_masu_y);
-                    obs_component.set_target_position(masu_real_point[obs_component.get_masu_x() + distance, receive_masu_y]);
-                    obs_list[obs_component.get_masu_x() + distance, receive_masu_y] = obs;
+                    obs_component.set_target_position(masu_real_point[obs_component.get_masu_x(), receive_masu_y]);
+                    obs_list[obs_component.get_masu_x(), receive_masu_y] = obs;
                     obs_component.set_is_moving(true);
                 }
                 is_search = false;
@@ -299,13 +293,12 @@ public class obstacle_manager : MonoBehaviour
                         is_null_zone = true;
                     }
                 }
-                distance--;
                 foreach (GameObject obs in moving_obs_list)
                 {
                     obstacle_function obs_component = obs.GetComponent<obstacle_function>();
                     obs_component.set_masu(obs_component.get_masu_x() - distance, receive_masu_y);
-                    obs_component.set_target_position(masu_real_point[obs_component.get_masu_x() - distance, receive_masu_y]);
-                    obs_list[obs_component.get_masu_x() - distance, receive_masu_y] = obs;
+                    obs_component.set_target_position(masu_real_point[obs_component.get_masu_x(), receive_masu_y]);
+                    obs_list[obs_component.get_masu_x(), receive_masu_y] = obs;
                     obs_component.set_is_moving(true);
                 }
                 is_search = false;

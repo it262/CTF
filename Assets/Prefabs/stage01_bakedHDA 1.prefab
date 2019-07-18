@@ -105,6 +105,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 57d7b536a01b5cb4c800ebe4caa5c6f3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  x: 10
-  z: 10
+  x: 11
+  z: 11
   debugObj: {fileID: 0}
