@@ -1673,7 +1673,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -0.00004690982, y: 0.000031853597}
+  m_AnchoredPosition: {x: -0.00004690982, y: -0.00007480429}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &966212016
@@ -6958,7 +6958,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1014048230}
   m_HandleRect: {fileID: 1014048229}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 0.99999994
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -8301,6 +8301,8 @@ MonoBehaviour:
     type: 3}
   players_id_turn_info: []
   turn_number: 0
+  TurnIndicater: {fileID: 3089369814807406559, guid: 29521fc44918f0148818c1efeb9ee1c0,
+    type: 3}
 --- !u!114 &1863396644
 MonoBehaviour:
   m_ObjectHideFlags: 0

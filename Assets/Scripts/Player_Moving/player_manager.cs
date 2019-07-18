@@ -27,6 +27,9 @@ public class player_manager : MonoBehaviour
     public Dictionary<string,Vector3> receive_position;
     public Dictionary<string, Vector3> receive_rotation;
 
+    [SerializeField] GameObject TurnIndicater;
+    GameObject TurnIndicater_Inscance;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -116,6 +119,7 @@ public class player_manager : MonoBehaviour
             if(turn_number == i)
             {
                 player.GetComponent<player_function>().set_my_turn(true);
+                TurnIndicater_Inscance = (GameObject)Instantiate(TurnIndicater, player.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
             }
             if(players_id_turn_info[i] == so.id)
             {
@@ -133,8 +137,10 @@ public class player_manager : MonoBehaviour
         turn_number += 1;
         turn_number = turn_number % player_number;
         GameObject player = players[players_id_turn_info[turn_number]];
+        TurnIndicater_Inscance.transform.position = player.transform.position + new Vector3(0, 1, 0);
         player.GetComponent<player_function>().set_my_turn(true);
         gm._GameState.Value = GameState.GameStart;
+        Debug.Log("TURNCHANGE:"+players_id_turn_info[turn_number]);
     }
 
     public void set_is_dead_player(string id)

@@ -33,6 +33,12 @@ public class obstacle_manager : MonoBehaviour
     string receive_attack_direction;
 
     public Dictionary<string, bool> obs_set_comp = new Dictionary<string, bool>();
+
+    List<GameObject> moving_obs_list = new List<GameObject>();
+    bool is_null_zone = false;
+    int distance = 0;
+    bool is_search = true, is_move_end = false;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -155,10 +161,10 @@ public class obstacle_manager : MonoBehaviour
         }
         //*server
         //マスの情報が送られてきたら
-        List<GameObject> moving_obs_list = new List<GameObject>();
-        bool is_null_zone = false;
-        int distance = 0;
-        bool is_search = true, is_move_end = false;
+        //List<GameObject> moving_obs_list = new List<GameObject>();
+        //bool is_null_zone = false;
+        //int distance = 0;
+        //bool is_search = true, is_move_end = false;
 
         //0 < server_masu_x < masu_x_number
         //0 < server_masu_y < masu_y_number
@@ -173,7 +179,6 @@ public class obstacle_manager : MonoBehaviour
                     {
                         if (is_null_zone)
                         {
-                            distance++;
                             break;
                         }
                         else
@@ -188,7 +193,7 @@ public class obstacle_manager : MonoBehaviour
                         is_null_zone = true;
                     }
                 }
-
+                distance--;
                 foreach (GameObject obs in moving_obs_list)
                 {
                     obstacle_function obs_component = obs.GetComponent<obstacle_function>();
@@ -202,13 +207,12 @@ public class obstacle_manager : MonoBehaviour
             else if (receive_attack_direction.Equals("Up"))
             {
                 //x固定、y正方向
-                for (int i = receive_masu_y; i <= masu_y_number; i++)
+                for (int i = receive_masu_y; i < masu_y_number; i++)
                 {
                     if (obs_list[receive_masu_x, i] != null)
                     {
                         if (is_null_zone)
                         {
-                            distance--;
                             break;
                         }
                         else
@@ -224,20 +228,23 @@ public class obstacle_manager : MonoBehaviour
                     }
                 }
 
+                distance--;
+
                 foreach (GameObject obs in moving_obs_list)
                 {
                     obstacle_function obs_component = obs.GetComponent<obstacle_function>();
                     obs_component.set_masu(receive_masu_x, obs_component.get_masu_y() + distance);
+                    Debug.Log(distance);
                     obs_component.set_target_position(masu_real_point[receive_masu_x, obs_component.get_masu_y() + distance]);
                     obs_list[receive_masu_x, obs_component.get_masu_y() + distance] = obs;
                     obs_component.set_is_moving(true);
                 }
                 is_search = false;
             }
-            else if (receive_attack_direction.Equals("Right"))
+            else if (receive_attack_direction.Equals("Left"))
             {
                 //y固定、x正方向
-                for (int i = receive_masu_x; i <= masu_x_number; i++)
+                for (int i = receive_masu_x; i < masu_x_number; i++)
                 {
                     if (obs_list[i, receive_masu_y] != null)
                     {
@@ -257,6 +264,7 @@ public class obstacle_manager : MonoBehaviour
                         is_null_zone = true;
                     }
                 }
+                distance--;
 
                 foreach (GameObject obs in moving_obs_list)
                 {
@@ -268,7 +276,7 @@ public class obstacle_manager : MonoBehaviour
                 }
                 is_search = false;
             }
-            else if (receive_attack_direction.Equals("Left"))
+            else if (receive_attack_direction.Equals("Right"))
             {
                 //y固定、x負方向
                 for (int i = receive_masu_x; i >= 0; i--)
@@ -291,6 +299,7 @@ public class obstacle_manager : MonoBehaviour
                         is_null_zone = true;
                     }
                 }
+                distance--;
                 foreach (GameObject obs in moving_obs_list)
                 {
                     obstacle_function obs_component = obs.GetComponent<obstacle_function>();
@@ -304,9 +313,11 @@ public class obstacle_manager : MonoBehaviour
         }
         else
         {
+            Debug.Log("isSerchEnd");
             //直接殴ったobstacleのis_movingがfalsuになったなら全体の移動が終わったということ
             if (!moving_obs_list[0].GetComponent<obstacle_function>().get_is_moving())
             {
+                Debug.Log("MoveEnd");
                 is_move_end = true;
             }
 
@@ -315,6 +326,11 @@ public class obstacle_manager : MonoBehaviour
             {
                 gm._GameState.Value = GameState.ChangeTurn;
                 receive_attack_direction = null;
+                moving_obs_list = new List<GameObject>();
+                is_null_zone = false;
+                distance = 0;
+                is_search = true;
+                is_move_end = false;
             }
         }
     }

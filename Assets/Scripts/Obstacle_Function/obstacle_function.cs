@@ -26,6 +26,7 @@ public class obstacle_function : MonoBehaviour
         //もし動く指示があったら
         if (is_moving)
         {
+            Debug.Log("移動中");
             float step = speed * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position, target_position, step);
             if (Vector3.Distance(transform.position, target_position) < 0.01f)
