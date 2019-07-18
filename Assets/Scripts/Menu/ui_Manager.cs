@@ -27,6 +27,11 @@ public class ui_Manager : MonoBehaviour
             .Where(x => x == GameState.RoomSettingComp)
             .Delay(System.TimeSpan.FromSeconds(3.0f))
             .Subscribe(_ => LoadComp());
+
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.DrawEventStart)
+            .Subscribe(_ => EndGame());
     }
 
     private void Update()
@@ -107,5 +112,14 @@ public class ui_Manager : MonoBehaviour
     void LoadComp()
     {
         Load.GetComponent<Animator>().SetBool("On", false);
+    }
+
+    void EndGame()
+    {
+        gm._GameState.Value = GameState.Menu;
+        var data = new Dictionary<string, string>();
+        data["to"] = "LEAVE";
+        SocketObject.Instance.EmitMessage("RoomMatching", data);
+        Menu();
     }
 }

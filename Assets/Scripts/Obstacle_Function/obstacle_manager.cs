@@ -50,6 +50,11 @@ public class obstacle_manager : MonoBehaviour
             .Where(x => x == GameState.PlayerSettingComp)
             .Subscribe(_ => set_obstacle());//処理
 
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.DrawEventStart)
+            .Subscribe(_ => CleanData());
+
     }
 
     // Update is called once per frame
@@ -240,7 +245,7 @@ public class obstacle_manager : MonoBehaviour
             else if (receive_attack_direction.Equals("Left"))
             {
                 //y固定、x正方向
-                for (int i = receive_masu_x; i <= masu_x_number; i++)
+                for (int i = receive_masu_x; i < masu_x_number; i++)
                 {
                     if (obs_list[i, receive_masu_y] != null)
                     {
@@ -333,5 +338,18 @@ public class obstacle_manager : MonoBehaviour
         this.receive_masu_x = x;
         this.receive_masu_y = y;
         this.receive_attack_direction = direction;
+    }
+
+    void CleanData()
+    {
+        obs_set_comp = new Dictionary<string, bool>();
+        moving_obs_list = new List<GameObject>();
+        for (int i = 0; i < obs_list.GetLength(0); i++)
+        {
+            for (int j = 0; j < obs_list.GetLength(1); j++)
+            {
+                Destroy(obs_list[i, j]);
+            }
+        }
     }
 }

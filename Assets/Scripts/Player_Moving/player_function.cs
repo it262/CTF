@@ -145,50 +145,57 @@ public class player_function : MonoBehaviour
             Ray ray = new Ray(transform.position, transform.forward);
             if (Physics.Raycast(ray, out RaycastHit hit, attack_range))
             {
-                obstacle_function hit_component = hit.collider.gameObject.GetComponent<obstacle_function>();
+                if (hit.collider.gameObject.CompareTag("Obstacle"))
+                {
+                    obstacle_function hit_component = hit.collider.gameObject.GetComponent<obstacle_function>();
 
-                int send_masu_x = hit_component.get_masu_x();
-                int send_masu_y = hit_component.get_masu_y();
-                //*殴った相手と自分の向きの情報を送る
-                //send_masu_x
-                //send_masu_y
-                //send_direction
+                    int send_masu_x = hit_component.get_masu_x();
+                    int send_masu_y = hit_component.get_masu_y();
+                    //*殴った相手と自分の向きの情報を送る
+                    //send_masu_x
+                    //send_masu_y
+                    //send_direction
 
-                var data = new Dictionary<string, string>();
-                data["TYPE"] = "Hit";
-                data["masuX"] = send_masu_x.ToString();
-                data["masuY"] = send_masu_y.ToString();
-                data["direction"] = send_direction;
-                so.EmitMessage("ToOwnRoom", data);
+                    var data = new Dictionary<string, string>();
+                    data["TYPE"] = "Hit";
+                    data["masuX"] = send_masu_x.ToString();
+                    data["masuY"] = send_masu_y.ToString();
+                    data["direction"] = send_direction;
+                    so.EmitMessage("ToOwnRoom", data);
 
-                this.set_my_turn(false);
+                    this.set_my_turn(false);
+                }
             }
         }
     }
 
     private void OnCollisionEnter(Collision collision)
     {
-        //Goalしたかどうかが分かる
-        //*自分がGoalしたという情報
-        if (collision.gameObject.name == "Goal")
+        if (!is_enemy)
         {
-            is_goal = true;
-            var data = new Dictionary<string, string>();
-            data["TYPE"] = "Goal";
-            so.EmitMessage("ToOwnRoom", data);
-        }
-
-        //障害物に潰されたら死亡する
-        //*自分が死亡したという情報
-        if (collision.gameObject.name == "Obstacle")
-        {
-            if (collision.gameObject.GetComponent<obstacle_function>().get_is_moving())
+            //Goalしたかどうかが分かる
+            //*自分がGoalしたという情報
+            if (collision.gameObject.name == "Goal")
             {
-                is_dead = true;
-                Destroy(gameObject);
+                is_goal = true;
                 var data = new Dictionary<string, string>();
-                data["TYPE"] = "Dead";
+                data["TYPE"] = "Goal";
                 so.EmitMessage("ToOwnRoom", data);
+            }
+
+            //障害物に潰されたら死亡する
+            //*自分が死亡したという情報
+            if (collision.gameObject.CompareTag("Obstacle"))
+            {
+                if (collision.gameObject.GetComponent<obstacle_function>().get_is_moving())
+                {
+                    Debug.Log("衝突！！！！！！！！！！");
+                    //is_dead = true;
+                    //Destroy(gameObject);
+                    var data = new Dictionary<string, string>();
+                    data["TYPE"] = "Dead";
+                    so.EmitMessage("ToOwnRoom", data);
+                }
             }
         }
     }
@@ -212,10 +219,11 @@ public class player_function : MonoBehaviour
     public void set_is_dead(bool is_dead)
     {
         //もしかしたら上のコードでdead判定に成功しているかも知れないので
-        if (!this.is_dead)
+        if (is_dead)
         {
             this.is_dead = is_dead;
             Destroy(gameObject);
+
         }
     }
 }

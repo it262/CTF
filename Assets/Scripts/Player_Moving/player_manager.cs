@@ -15,7 +15,7 @@ public class player_manager : MonoBehaviour
     int masu_x_number;
     int masu_y_number;
     //プレイヤ
-    public GameObject player_prefab;
+    public GameObject player_prefab,enemy_prefab;
     public OrderedDictionary members = new OrderedDictionary();　//id情報と名前*
     public Dictionary<string, GameObject> players = new Dictionary<string, GameObject>();//idとプレイヤーの対応辞書*
     Dictionary<string, bool> is_players_dead = new Dictionary<string, bool>(); //idと死んだかどうかの対応表
@@ -24,7 +24,7 @@ public class player_manager : MonoBehaviour
     public string[] players_id_turn_info;//ターンの情報*
     public int turn_number;//現在のターンの場所*
     //サーバから位置情報を受け取る
-    public Dictionary<string,Vector3> receive_position;
+    public Dictionary<string, Vector3> receive_position;
     public Dictionary<string, Vector3> receive_rotation;
 
     [SerializeField] GameObject TurnIndicater;
@@ -45,6 +45,11 @@ public class player_manager : MonoBehaviour
             .DistinctUntilChanged()
             .Where(x => x == GameState.ChangeTurn)
             .Subscribe(_ => change_turn());
+
+        gm._GameState
+            .DistinctUntilChanged()
+            .Where(x => x == GameState.DrawEventStart)
+            .Subscribe(_ => CleanData());
 
         receive_position = new Dictionary<string, Vector3>();
         receive_rotation = new Dictionary<string, Vector3>();
@@ -82,7 +87,7 @@ public class player_manager : MonoBehaviour
         foreach (DictionaryEntry pair in members)
         {
             players_id_turn_info[count] = pair.Key.ToString();
-            is_players_dead[pair.Key.ToString()] = false;
+            is_players_dead.Add(pair.Key.ToString(), false);
             count++;
         }
         players = new Dictionary<string, GameObject>();
@@ -101,35 +106,47 @@ public class player_manager : MonoBehaviour
         {
             Debug.Log("2");
             int spawn_masu_x = 0, spawn_masu_y = 0;
-            if(i == 0)
+            if (i == 0)
             {
                 spawn_masu_x = 0;
                 spawn_masu_y = 0;
-            }else if(i == 1)
+            } else if (i == 1)
             {
-                spawn_masu_x = masu_x_number-1;
+                spawn_masu_x = masu_x_number - 1;
                 spawn_masu_y = 0;
-            }else if(i == 2)
+            } else if (i == 2)
             {
-                spawn_masu_x = masu_x_number-1;
-                spawn_masu_y = masu_y_number-1;
-            }else if(i == 3)
+                spawn_masu_x = masu_x_number - 1;
+                spawn_masu_y = masu_y_number - 1;
+            } else if (i == 3)
             {
                 spawn_masu_x = 0;
-                spawn_masu_y = masu_y_number-1;
+                spawn_masu_y = masu_y_number - 1;
             }
             Debug.Log("3");
-            GameObject player = (GameObject)Instantiate(player_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
-            if(turn_number == i)
+
+            if (players_id_turn_info[i] == so.id)
             {
-                player.GetComponent<player_function>().set_my_turn(true);
-                TurnIndicater_Inscance = (GameObject)Instantiate(TurnIndicater, player.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
-            }
-            if(players_id_turn_info[i] == so.id)
-            {
+                GameObject player = (GameObject)Instantiate(player_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
                 player.GetComponent<player_function>().set_is_enemy(false);
+                if (turn_number == i)
+                {
+                    player.GetComponent<player_function>().set_my_turn(true);
+                    TurnIndicater_Inscance = (GameObject)Instantiate(TurnIndicater, player.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+                }
+                players.Add(players_id_turn_info[i], player);
             }
-            players.Add(players_id_turn_info[i], player);
+            else
+            {
+                GameObject player = (GameObject)Instantiate(enemy_prefab, masu_real_point[spawn_masu_x, spawn_masu_y], Quaternion.identity);
+                if (turn_number == i)
+                {
+                    player.GetComponent<player_function>().set_my_turn(true);
+                    TurnIndicater_Inscance = (GameObject)Instantiate(TurnIndicater, player.transform.position + new Vector3(0, 1, 0), Quaternion.identity);
+                }
+                players.Add(players_id_turn_info[i], player);
+            }
+
         }
 
         //なんかアニメーションをやる？どういう順番で進行していくかとかのUIができたらいいよね。
@@ -140,17 +157,29 @@ public class player_manager : MonoBehaviour
     {
         turn_number += 1;
         turn_number = turn_number % player_number;
+        if (is_players_dead[players_id_turn_info[turn_number]])
+        {
+            change_turn();
+            return;
+        }
         GameObject player = players[players_id_turn_info[turn_number]];
         TurnIndicater_Inscance.transform.position = player.transform.position + new Vector3(0, 1, 0);
         player.GetComponent<player_function>().set_my_turn(true);
         gm._GameState.Value = GameState.GameStart;
-        Debug.Log("TURNCHANGE:"+players_id_turn_info[turn_number]);
+        Debug.Log("TURNCHANGE:" + players_id_turn_info[turn_number]);
     }
 
     public void set_is_dead_player(string id)
     {
+
         is_players_dead[id] = true;
         players[id].GetComponent<player_function>().set_is_dead(true);
+        if (players_id_turn_info[turn_number].Equals(id))
+        {
+            change_turn();
+        }
+        //players.Remove(id);
+        Debug.Log("Dead->" + id);
 
         //もし全てのプレイヤーが死んでしまったら
         if (!is_players_dead.ContainsValue(false))
@@ -158,5 +187,16 @@ public class player_manager : MonoBehaviour
             //draw演出？
             gm._GameState.Value = GameState.DrawEventStart;
         }
+    }
+
+    public void CleanData()
+    {
+        receive_position = new Dictionary<string, Vector3>();
+        receive_rotation = new Dictionary<string, Vector3>();
+        foreach(KeyValuePair<string,GameObject> pair in players)
+        {
+            Destroy(pair.Value);
+        }
+        players.Clear();
     }
 }
