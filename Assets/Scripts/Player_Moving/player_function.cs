@@ -83,8 +83,6 @@ public class player_function : MonoBehaviour
             Vector3 def = transform.rotation.eulerAngles;
             def.y += rotate_speed;
             send_rotation = def;
-            transform.eulerAngles = send_rotation;
-            
         }
 
         velocity = velocity.normalized * move_speed * Time.deltaTime;
@@ -93,13 +91,13 @@ public class player_function : MonoBehaviour
         {
             Vector3 def = transform.position;
             send_position = def + gameObject.transform.rotation * velocity;
-            transform.position = send_position;
-            
         }
 
         //*位置と向きを送る
-        if (send_position != null || send_rotation != null)
+        if (transform.position != send_position || transform.eulerAngles != send_rotation)
         {
+            transform.position = send_position;
+            transform.eulerAngles = send_rotation;
             var data = new Dictionary<string, string>();
             data["TYPE"] = "Transform";
             //send_position
@@ -142,7 +140,7 @@ public class player_function : MonoBehaviour
             send_direction = "Up";
         }
 
-        if (Input.GetMouseButton(0))
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             Ray ray = new Ray(transform.position, transform.forward);
             if (Physics.Raycast(ray, out RaycastHit hit, attack_range))
@@ -164,7 +162,6 @@ public class player_function : MonoBehaviour
                 so.EmitMessage("ToOwnRoom", data);
 
                 this.set_my_turn(false);
-                gm._GameState.Value = GameState.MoveObstacles;
             }
         }
     }
@@ -203,8 +200,8 @@ public class player_function : MonoBehaviour
 
     public void set_pos_rot(Vector3 pos, Vector3 rot)
     {
-        this.transform.position = pos;
-        this.transform.eulerAngles = rot;
+        transform.position = pos;
+        transform.eulerAngles = rot;
     }
 
     public void set_is_enemy(bool is_enemy)

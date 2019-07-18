@@ -9,7 +9,6 @@ using UniRx;
 public class room_Matching : MonoBehaviour
 {
     SocketObject so;
-    DataWorker dw;
     GameManager gm;
 
     [SerializeField] GameObject content, pref;
@@ -24,7 +23,6 @@ public class room_Matching : MonoBehaviour
     void Start()
     {
         so = SocketObject.Instance;
-        dw = DataWorker.Instance;
         gm = GameManager.Instance;
         StartCoroutine("RequestRoomData");
 

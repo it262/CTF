@@ -50,18 +50,23 @@ public class player_manager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        foreach (KeyValuePair<string, Vector3> pos in receive_position)
+        if (receive_position.Count > 0)
         {
-            string receive_id = pos.Key;
-            Vector3 rot = receive_rotation[receive_id];
-            if (players.ContainsKey(receive_id) && !receive_id.Equals(so.id))
+            foreach (KeyValuePair<string, Vector3> pos in receive_position)
             {
-                //*サーバから位置と向きを受け取ったら更新する
-                GameObject player = players[receive_id];
-                player_function player_component = player.GetComponent<player_function>();
-                player_component.set_pos_rot(pos.Value, rot);
-                players.Remove(receive_id);
+                string receive_id = pos.Key;
+                Vector3 rot = receive_rotation[receive_id];
+                if (players.ContainsKey(receive_id) && !receive_id.Equals(so.id))
+                {
+                    Debug.Log(receive_id + ":" + pos.Value);
+                    //*サーバから位置と向きを受け取ったら更新する
+                    GameObject player = players[receive_id];
+                    player_function player_component = player.GetComponent<player_function>();
+                    player_component.set_pos_rot(pos.Value, rot);
+                }
             }
+            receive_position.Clear();
+            receive_rotation.Clear();
         }
     }
 

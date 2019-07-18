@@ -149,6 +149,10 @@ public class obstacle_manager : MonoBehaviour
 
     void move_obstacles()
     {
+        if(receive_attack_direction == null)
+        {
+            return;
+        }
         //*server
         //マスの情報が送られてきたら
         List<GameObject> moving_obs_list = new List<GameObject>();
@@ -160,7 +164,7 @@ public class obstacle_manager : MonoBehaviour
         //0 < server_masu_y < masu_y_number
         if (is_search)
         {
-            if (receive_attack_direction.Equals("Up"))
+            if (receive_attack_direction.Equals("Down"))
             {
                 //x固定、y負方向
                 for (int i = receive_masu_y; i >= 0; i--)
@@ -169,6 +173,7 @@ public class obstacle_manager : MonoBehaviour
                     {
                         if (is_null_zone)
                         {
+                            distance++;
                             break;
                         }
                         else
@@ -194,7 +199,7 @@ public class obstacle_manager : MonoBehaviour
                 }
                 is_search = false;
             }
-            else if (receive_attack_direction.Equals("Down"))
+            else if (receive_attack_direction.Equals("Up"))
             {
                 //x固定、y正方向
                 for (int i = receive_masu_y; i <= masu_y_number; i++)
@@ -203,6 +208,7 @@ public class obstacle_manager : MonoBehaviour
                     {
                         if (is_null_zone)
                         {
+                            distance--;
                             break;
                         }
                         else
@@ -308,7 +314,15 @@ public class obstacle_manager : MonoBehaviour
             if (is_move_end)
             {
                 gm._GameState.Value = GameState.ChangeTurn;
+                receive_attack_direction = null;
             }
         }
+    }
+
+    public void setReceice_Attack_Data(int x,int y,string direction)
+    {
+        this.receive_masu_x = x;
+        this.receive_masu_y = y;
+        this.receive_attack_direction = direction;
     }
 }

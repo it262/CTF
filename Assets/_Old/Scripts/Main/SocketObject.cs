@@ -37,6 +37,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 {
 	private SocketIOComponent socket;
 
+    GameManager gm;
+
 	string url = "ws://52.194.134.160:1337/socket.io/?EIO=4&transport=websocket";
 
 	public string id,name;
@@ -61,7 +63,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 	{
 		DontDestroyOnLoad (this.gameObject);
         //Connect();
-        GameManager.Instance._GameState.Value = GameState.Menu;
+        gm = GameManager.Instance;
+        gm._GameState.Value = GameState.Menu;
     }
 
 	public void joinRoom(string roomName){
@@ -99,23 +102,14 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 				socket.On ("open", SocketOpen);
 				socket.On ("ID", ReceiveID);
-				socket.On ("UpdateRoom", UpdateRoom);
-				socket.On ("PingName",PingName);
-				socket.On ("PongName", PongName);
 				socket.On ("RoomData", RoomData);
                 socket.On ("Failure", Failure);
                 socket.On ("Join", Join);
                 socket.On ("Already", Already);
                 socket.On ("GameStart", GameStart);
-				socket.On ("Message", Message);
                 socket.On ("Transform", Trans);
                 socket.On ("Hit", Hit);
-				socket.On ("PlayerEliminate", PlayerEliminate);
-				socket.On ("PushSwitch", PushSwitch);
-				socket.On ("FirstObs", FirstObs);
-				socket.On ("Obs", Obs);
 				socket.On ("DestroyObs", DestroyObs);
-				socket.On ("StateUpdate", StateUpdate);
 				socket.On ("Dead", Dead);
 				socket.On ("HeartBeat", HeartBeat);
 				socket.On ("error", ReceiveError);
@@ -170,27 +164,12 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
         GetComponent<ui_Manager>().Name.GetComponent<Animator>().SetTrigger("Start");//幕開け
     }
 		
-	public void UpdateRoom(SocketIOEvent e){
-		//他プレイヤーへのROOM更新要請
-		GetComponent<DataWorker>().roomQue.Enqueue(new JSONObject(e.data.ToString ()).ToDictionary());
-	}
-
-	public void PingName(SocketIOEvent e){
-		var data = new Dictionary<string,string> ();
-		data ["name"] = WWW.EscapeURL(name);
-		EmitMessage ("PongName", data);
-	}
-
-	public void PongName(SocketIOEvent e){
-		Dictionary<string,string> d = new JSONObject (e.data.ToString ()).ToDictionary ();
-		GetComponent<DataWorker> ().myRoom.member [d ["id"]] = WWW.UnEscapeURL (d ["name"]);
-	}
 
 	public void RoomData(SocketIOEvent e){
         Debug.Log("GETROOMDATA");
 		GetComponent<room_Matching>().roomState = e.data;
         Debug.Log(e.data);
-        GameManager.Instance._GameState.Value = GameState.GetRoomData;
+        gm._GameState.Value = GameState.GetRoomData;
 	}
 
     public void Failure(SocketIOEvent e)
@@ -208,24 +187,20 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 		r.cnt = int.Parse (data["length"].ToString ());
         GetComponent<room_Matching>().myRoom = r;
         Debug.Log("[入室]" + r.roomName);
-        GameManager.Instance._GameState.Value = GameState.RoomDataUpdate;
+        gm._GameState.Value = GameState.RoomDataUpdate;
 	}
 
     public void Already(SocketIOEvent e)
     {
         var data = new JSONObject(e.data.ToString());
         Debug.Log("Room:" + data["room"] + "は既に存在しています");
-        GameManager.Instance._GameState.Value = GameState.Menu;
+        gm._GameState.Value = GameState.Menu;
     }
 
     public void GameStart(SocketIOEvent e){
 		//GetComponent<DataWorker> ().startFlug = true;
 	}
 
-	public void Message(SocketIOEvent e)
-	{
-		GetComponent<DataWorker>().chatQue.Enqueue(new JSONObject(e.data.ToString ()).ToDictionary());
-	}
 
     /*
 	public void Pos(SocketIOEvent e)
@@ -255,40 +230,13 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 	{
 		Debug.Log ("Hit!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 		Dictionary<string,string> d = new JSONObject (e.data.ToString ()).ToDictionary ();
-		GetComponent<DataWorker>().hitQue.Enqueue(new JSONObject(e.data.ToString ()).ToDictionary());
-	}
-
-	public void PlayerEliminate(SocketIOEvent e){
-		Dictionary<string,string> d = new JSONObject (e.data.ToString ()).ToDictionary ();
-		GetComponent<DataWorker> ().elimQue.Enqueue (new JSONObject(e.data.ToString ()).ToDictionary());
-	}
-
-	public void PushSwitch(SocketIOEvent e){
-		Dictionary<string,string> d = new JSONObject (e.data.ToString ()).ToDictionary ();
-		GetComponent<DataWorker> ().pushSwitch.Add (d ["trg"], true);
-	}
-
-	public void FirstObs(SocketIOEvent e)
-	{
-		Debug.Log ("初期オブジェクト位置受信");
-		GetComponent<DataWorker>().InstanceObsCon.GetComponent<ObstacleControllSync> ().first = new JSONObject (e.data.ToString ()).ToDictionary ();
-	}
-
-	public void Obs(SocketIOEvent e)
-	{
-		Debug.Log ("OBSデータ受信");
-		Dictionary<string,string> d = new JSONObject (e.data.ToString ()).ToDictionary ();
-		GetComponent<DataWorker>().InstanceObsCon.GetComponent<ObstacleControllSync> ().obs.Enqueue(d["json"]);
-	}
+        GetComponent<obstacle_manager>().setReceice_Attack_Data(int.Parse(d["masuX"]),int.Parse(d["masuY"]), d["direction"]);
+        gm._GameState.Value = GameState.MoveObstacles;
+    }
 
 	public void DestroyObs(SocketIOEvent e)
 	{
-		GetComponent<DataWorker>().InstanceObsCon.GetComponent<ObstacleControllSync> ().victim.Enqueue(new JSONObject (e.data.ToString ()).ToDictionary ());
-	}
-
-	public void StateUpdate(SocketIOEvent e)
-	{
-		GetComponent<DataWorker>().InstanceObsCon.GetComponent<ObstacleControllSync> ().state[new JSONObject (e.data.ToString ()).ToDictionary ()["id"]] = new JSONObject (e.data.ToString ()).ToDictionary ()["state"];
+		//GetComponent<DataWorker>().InstanceObsCon.GetComponent<ObstacleControllSync> ().victim.Enqueue(new JSONObject (e.data.ToString ()).ToDictionary ());
 	}
 
 	public void Dead(SocketIOEvent e)
@@ -299,7 +247,7 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 	public void HeartBeat(SocketIOEvent e)
 	{
-		GetComponent<DataWorker>().heatbeat.Add(new JSONObject(e.data.ToString ()).ToDictionary()["id"],true);
+		//GetComponent<DataWorker>().heatbeat.Add(new JSONObject(e.data.ToString ()).ToDictionary()["id"],true);
 	}
 
 	public void Disconnection(){
