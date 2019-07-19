@@ -109,8 +109,12 @@ public class obstacle_manager : MonoBehaviour
                         }
                         cnt++;
                     }
+                    
+
                 }
             }
+
+            
 
             obs_set_comp[so.id] = true;
             so.EmitMessage("ToOwnRoom", data);

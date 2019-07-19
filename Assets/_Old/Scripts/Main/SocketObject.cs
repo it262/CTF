@@ -47,6 +47,10 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 
 	public bool connecting = false;
 
+    System.DateTime now;
+
+    public long ms;
+
     /*
 	void Awake(){
 		GameObject[] sockets = GameObject.FindGameObjectsWithTag ("SocketObject");
@@ -84,7 +88,8 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
 	public void EmitMessage(string s,Dictionary<string,string> d){
 		if (connecting) {
             socket.Emit (s, new JSONObject (d));
-		} else {
+            now = System.DateTime.Now;
+        } else {
             Debug.Log ("[ERROR]オンライン状態ではありません");
 		}
 	}
@@ -224,6 +229,9 @@ public class SocketObject : SingletonMonoBehavior<SocketObject>
         GetComponent<player_manager>().receive_position.Add(d["id"], new Vector3(float.Parse(d["posX"]), float.Parse(d["posY"]), float.Parse(d["posZ"])));
         GetComponent<player_manager>().receive_rotation.Add(d["id"], new Vector3(float.Parse(d["rotX"]), float.Parse(d["rotY"]), float.Parse(d["rotZ"])));
         Debug.Log("Transform受信"+d["id"]);
+        System.DateTime nowMsec0 = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second);
+        ms = (long)((DateTime.Now - nowMsec0).TotalMilliseconds);
+        Debug.Log("レイテンシ:"+ms+"ms");
     }
 
     public void Hit(SocketIOEvent e)
